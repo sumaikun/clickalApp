@@ -1,0 +1,59 @@
+0. npx create-react-app myApp
+
+
+1. Install react material
+
+    npm install @material-ui/core
+
+2. Install redux
+
+    npm install redux
+
+3. Install redux thunk
+
+    npm i redux-thunk
+
+4. Install react router
+
+    npm i react-router-dom
+
+5. Install react-redux
+
+    npm install redux react-redux --save
+
+6. Install axios
+
+    npm install axios
+
+7. Install history ?
+
+    npm i history
+
+8. Install icons
+
+    npm install @material-ui/icons
+
+9. Install moment
+
+    npm install moment
+
+10. if desired charts libraries
+
+    npm install react-chartjs-2
+
+    npm install chart.js
+
+11
+    npm install react-perfect-scrollbar
+
+12 Validate library
+
+    npm install validate.js
+
+13 Persist store
+
+    npm install redux-persist
+
+14 understand sass
+
+    npm install node-sass
