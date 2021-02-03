@@ -10,7 +10,8 @@ import {
   export function auth(
     state = {
       user:null,
-      token:null
+      token:null,
+      userType:null,
     },
     action
   ) {
@@ -19,13 +20,15 @@ import {
       case LOGIN_SUCCESS:
         return Object.assign({}, state, {
           user:action.user,
-          token:action.token
+          token:action.token,
+          userType:action.userType
         });
 
       case LOGOUT_SUCCESS:
         return Object.assign({}, state, {
           user:null,
-          token:null
+          token:null,
+          userType:null
         });
 
       default:

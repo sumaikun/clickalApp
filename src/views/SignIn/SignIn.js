@@ -7,7 +7,6 @@ import { makeStyles } from '@material-ui/styles';
 import {
   Grid,
   Button,
-  IconButton,
   TextField,
   Typography,
   Avatar,
@@ -113,11 +112,7 @@ const SignIn = props => {
   const handleSignIn = event => {
     
     event.preventDefault()
-    console.log("it is time to login")
-    console.log(formState.values)
     props.loginUser(formState.values, ( success , error ) =>{
-      
-      console.log("done")
       
       if(success){
 
@@ -185,8 +180,9 @@ const SignIn = props => {
             autoComplete="current-password"
             onChange={handleChange}
           />
-            <Link  variant="body2" onClick={ (e) => {
-               
+            <Link  variant="body2" style={{cursor:"pointer"}}  onClick={ (e) => {
+                e.preventDefault()  
+                props.history.push("/forgot-password")
               }}>
                 {"¿ Olvidaste la contraseña ? Haz click aqui"}
               </Link>
@@ -220,7 +216,7 @@ const SignIn = props => {
                </Link>*/ } 
             </Grid>
             <Grid item>          
-              <Link  variant="body2" onClick={ (e) => {
+              <Link  variant="body2" style={{cursor:"pointer"}} onClick={ (e) => {
                 e.preventDefault()  
                 props.history.push("/sign-up")
               }}>

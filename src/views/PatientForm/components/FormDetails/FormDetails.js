@@ -121,7 +121,8 @@ const FormDetails = props => {
     } 
   }
 
-  const savePatient = () =>{
+  const savePatient = (e) =>{
+    e.preventDefault()
     props.submitData(errors)
   }
 
@@ -133,7 +134,7 @@ const FormDetails = props => {
     >
       <form
         autoComplete="off"
-        noValidate
+        onSubmit={savePatient} 
       >
         <CardHeader
           subheader="Ingresar la información del paciente"
@@ -264,7 +265,6 @@ const FormDetails = props => {
                 onChange={handleChange}
                 type="number"
                 value={props.patientDetails.phone2}
-                required
                 variant="outlined"
                 disabled={ mode === "watch" }
               />
@@ -285,6 +285,7 @@ const FormDetails = props => {
                       'aria-label': 'change date',
                     }}
                     disabled={ mode === "watch" }
+                    required
                 />
 
               </Grid>
@@ -372,9 +373,9 @@ const FormDetails = props => {
         <Divider />
         <CardActions>
           <Button
+            type="submit"
             color="primary"
             variant="contained"
-            onClick={savePatient}
             disabled={ mode === "watch" }
           >
             Guardar

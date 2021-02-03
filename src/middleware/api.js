@@ -58,7 +58,7 @@ instance.interceptors.response.use((response) => {
     //console.log(error.config,error.message,error.config.url.includes("auth"));
 
     if( ( error.message.includes("401") ||  error.message.includes("403") ) 
-        && error.config.url.includes("auth") === false )
+        && error.config.url.includes("auth") === false  && error.config.url.includes("forgot") === false )
     {
       Window.Store.dispatch({type:LOGOUT_SUCCESS})    
       window.location.assign("/sign-in")     

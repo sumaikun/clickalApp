@@ -19,7 +19,7 @@ import clicalPicture from 'assets/branding/Clicalmedic/svgClical2.svg'
 
 import api from 'middleware/api'
 
-console.log("clicalPicture",clicalPicture)
+//console.log("clicalPicture",clicalPicture)
 
 const schema = {
   Username: {
@@ -64,7 +64,7 @@ const urlParams = new URLSearchParams(window.location.search);
 
 const tokenParam = urlParams.get('tokenizer');
 
-console.log("tokenParam",tokenParam)
+//console.log("tokenParam",tokenParam)
 
 const RecoverPassword = props => {
 
@@ -102,7 +102,7 @@ const RecoverPassword = props => {
   const handleSubmit = event => {
     
     event.preventDefault()
-    console.log(formState.values)
+    //console.log(formState.values)
 
     
 

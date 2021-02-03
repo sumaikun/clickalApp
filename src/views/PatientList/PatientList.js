@@ -264,6 +264,7 @@ class PatientList extends Component{
     return (
       <div className={classes.root}>
         <PatientsToolbar
+          authState = {this.props.authState}
           medicalRecordsButton={this.medicalRecordsButton}
           medicalAppointmentButton={this.medicalAppointmentButton}
           ownersButton={this.ownersButton}

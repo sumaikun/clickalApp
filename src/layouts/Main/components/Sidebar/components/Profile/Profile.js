@@ -26,12 +26,14 @@ const useStyles = makeStyles(theme => ({
 const Profile = props => {
   const { className, ...rest } = props;
 
+  console.log("props",props)
+
   const classes = useStyles();
 
   const user = {
     name: props.authState.user.name + " " +props.authState.user.lastName,
     avatar: process.env.REACT_APP_SERVE_IMAGE+props.authState.user.picture,
-    bio: props.authState.user.role ?  props.authState.user.role : props.authState.user.specialistType ? "DOCTOR" : ""
+    bio:  props.authState.user.role  || props.authState.userType == 2 &&  "DOCTOR" || props.authState.userType == 3 & "PATIENT"
   };
 
   return (
@@ -62,7 +64,6 @@ Profile.propTypes = {
 };
 
 const mapStateToProps = state => {
- 
   return {
     authState: state.auth,  
   };

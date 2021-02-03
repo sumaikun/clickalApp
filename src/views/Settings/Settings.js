@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { makeStyles } from '@material-ui/styles';
 import { Grid } from '@material-ui/core';
 
-import { Notifications, Password } from './components';
+import { Notifications, Password, AllowedDoctors } from './components';
 import { getDoctorConfig, saveDoctorConfig, updateDoctorConfig } from "actions/settings";
 
 import { connect } from "react-redux";
@@ -67,15 +67,22 @@ const Settings = (props) => {
         
         <Grid
           item
-          md={7}
+          md={ props.auth.userType == 3 && 12 || 7 }
           xs={12}
         >
-          <Notifications saveSetting={saveSetting} doctorSetting={props.doctorSetting} />
+          { props.auth.userType == 2 &&
+            <Notifications saveSetting={saveSetting} doctorSetting={props.doctorSetting} />
+          }
+
+          { props.auth.userType == 3 &&
+            <AllowedDoctors doctors={[]} />
+          }
+          
         </Grid>
         
         <Grid
           item
-          md={5}
+          md={ props.auth.userType == 3 && 12 || 5 }
           xs={12}
         >
           <Password />
@@ -86,7 +93,6 @@ const Settings = (props) => {
 };
 
 const mapStateToProps = state => {
-  console.log("state",state)
   return {
     auth: state.auth,  
     doctorSetting: state.settings.doctorSetting

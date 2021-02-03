@@ -112,19 +112,15 @@ const Sidebar = props => {
     })   
   }
 
-  if(props.authState.user.specialistType)
-  {
-    pages.push(
-    {
-      title: 'Pacientes',
-      href: '/patients',
-      icon: <AccessibilityIcon />
-    }) 
-  }
 
-  if(!props.authState.user.role)
+  if(props.authState.userType == 2)
   {
     pages.push(
+      {
+        title: 'Pacientes',
+        href: '/patients',
+        icon: <AccessibilityIcon />
+      },
       {
         title: 'Agenda',
         href: '/agenda',
@@ -167,6 +163,22 @@ const Sidebar = props => {
       icon: <Lock/>
     }
   ];*/
+
+  if(props.authState.userType == 3)
+  {
+    pages.push(
+      {
+        title: 'Historial Medico',
+        href: '/medicalRecords',
+        icon: <Book />
+      },      
+      {
+        title: 'Configuración',
+        href: '/settings',
+        icon: <SettingsIcon />
+      }
+    )
+  }
 
 
   if(props.authState.user.role === "DEVELOPER")

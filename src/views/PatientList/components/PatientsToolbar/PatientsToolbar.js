@@ -40,7 +40,7 @@ const CustomRouterLink = forwardRef((props, ref) => (
 ));*/
 
 const PatientsToolbar = props => {
-  const { className, ...rest } = props;
+  const { className, authState, ...rest } = props;
 
   const classes = useStyles();
 
@@ -73,18 +73,14 @@ const PatientsToolbar = props => {
           <Button className={classes.importButton}  disabled={ props.selectedPatient === null } 
             onClick={props.editButton}>Editar</Button>
           
-          <Button className={classes.exportButton} disabled={ props.selectedPatient === null  } 
-            onClick={props.deleteButton}>Inactivar</Button>
+          {
+            authState.userType == 1 &&
+            <Button className={classes.exportButton} disabled={ props.selectedPatient === null  } 
+            onClick={props.deleteButton}>Inactivar</Button> 
+          }
           
- 
 
-          {/*<Button
-            color="primary"
-            variant="contained"
-            onClick={props.createButton}
-          >
-            Agregar Paciente
-          </Button>*/}
+          <Button color="primary" variant="contained"  onClick={props.createButton}>Agregar Paciente</Button>
           
         </Grid>
       </div>

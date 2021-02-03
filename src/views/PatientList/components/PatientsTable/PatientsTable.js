@@ -100,6 +100,7 @@ const PatientsTable = props => {
                     </TableCell>
                     <TableCell>Nombre</TableCell>
                     <TableCell>Apellido</TableCell>
+                    <TableCell>¿App?</TableCell>
                     <TableCell>Correo</TableCell>
                     <TableCell>Dirección</TableCell>
                     <TableCell>Estrato</TableCell>
@@ -139,10 +140,11 @@ const PatientsTable = props => {
                         </div>
                       </TableCell>
                       <TableCell>{ patient.lastName }</TableCell>
+                      <TableCell>{ patient.password ? "SI" : "NO" }</TableCell>
                       <TableCell>{ patient.email }</TableCell>
                       <TableCell>{ patient.address }</TableCell>
                       <TableCell>{ patient.stratus }</TableCell>
-                      <TableCell>{ patient.cityDetails[0]?.name }</TableCell>
+                      <TableCell>{ patient.cityDetails && patient.cityDetails[0]?.name }</TableCell>
                       <TableCell>{ patient.phone }</TableCell>
                       <TableCell>{ patient.birthDate.split("T")[0] }</TableCell>
                       <TableCell>

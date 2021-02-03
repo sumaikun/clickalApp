@@ -136,7 +136,7 @@ export default function SignUp(props) {
 
 
   const handleCheck = (event) => {
-    console.log(event.target.checked,event.target.name);
+    //console.log(event.target.checked,event.target.name);
 
     setValues({
       ...values,
@@ -147,7 +147,7 @@ export default function SignUp(props) {
 
   const AutoCompleteChange = (event, complete, name) => {
 
-    console.log("autocomplete changed",event,complete,name)
+   // console.log("autocomplete changed",event,complete,name)
     
     if(values){
       setValues({
@@ -161,7 +161,7 @@ export default function SignUp(props) {
 
   const sendForm = event => {
     event.preventDefault()
-    console.log("send form", values, errors.length)
+    //console.log("send form", values, errors.length)
 
     for (var i = 0; i < errors.length; i++) {
         if(errors[i])
@@ -194,7 +194,7 @@ export default function SignUp(props) {
 
     const user = { name, lastName, email, password, phone, city, confirmed }
 
-    console.log(user)
+    //console.log(user)
 
     if(values.type === "Patient")
     {
