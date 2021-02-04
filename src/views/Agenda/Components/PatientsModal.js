@@ -81,14 +81,6 @@ const PatientsModal = props => {
     }
   }
 
-  const patientSelected = (data) => {
-    
-    const patient = patients.filter( patient => patient._id === data  )[0]
-    console.log("patientSelected",patient)
-    setOpenPatientConfirmation(true)
-    setSelectedPatient(patient)
-  }
-
   const confirmPatient = () => {
     setOpenPatientConfirmation(false)
     
@@ -99,6 +91,12 @@ const PatientsModal = props => {
 
   const cancelPatient = () => {
     setOpenPatientConfirmation(false)
+  }
+
+  const addSelectedPatient = (patient) => {
+    console.log("addSelectedPatient",patient)
+    setSelectedPatient(patient)
+    setOpenPatientConfirmation(true)
   }
   
   const classes = useStyles();
@@ -122,7 +120,7 @@ const PatientsModal = props => {
                     placeholder="Buscar"
                     onChange={addFilterText}
                 />  
-                <PatientsTable patientSelected={patientSelected} patients={filteredPatients || []} />
+                <PatientsTable addSelectedPatient={addSelectedPatient} patients={filteredPatients || []} />
             </DialogContent>
             <DialogActions>
                 <Button onClick={handleClose} color="primary">
@@ -130,17 +128,18 @@ const PatientsModal = props => {
                 </Button>       
             </DialogActions>
             </Dialog>
+
             <Dialog
                 open={openPatientConfirmation}
                 onClose={cancelPatient}
                 aria-labelledby="draggable-dialog-title"
             >
                 <DialogTitle>
-                Desea seleccionar este patiento
+                  Desea seleccionar este paciente
                 </DialogTitle>
                 <DialogContent>
                 <DialogContentText>
-                    Este patiento se asociara al plan terapeutico actual
+                  Seleccionara este paciente para un proceso de cita
                 </DialogContentText>
                 </DialogContent>
                 <DialogActions>

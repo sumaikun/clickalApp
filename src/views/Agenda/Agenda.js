@@ -4,13 +4,12 @@ import { ReactAgenda , ReactAgendaCtrl, guid , getUnique , getLast , getFirst , 
 import { connect } from 'react-redux';
 import Swal from 'sweetalert2' 
 import { getAgendaAnnotations, saveAgendaAnnotation } from 'actions/agendaAnnotations'
-import { getAppointments } from 'actions/appointments'
+import { getAppointments, saveAppointment, getAppointmentsByPatientAndDate  } from 'actions/appointments'
 import { getPatients } from 'actions/patients'
+import { saveMedicine, getMedicinesByAppointment } from 'actions/medicines'
 import { Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
-  DialogActions,
   Table,
   TableBody,
   TableCell,
@@ -21,7 +20,11 @@ import { Dialog,
 TextField } from '@material-ui/core'
 
 import PerfectScrollbar from 'react-perfect-scrollbar';
+
+import AppointmentsModal from 'views/PatientList/components/AppointmentsModal'
+
 import PatientsModal from './Components/PatientsModal';
+
 
 var now = new Date();
 
@@ -64,8 +67,10 @@ class Agenda extends Component {
         openNotesModal:false,
         openSelectionModal:false,
         openPatientsModal:false,
+        openAppointmentsModal:false,
         patiens:[],
-        annotationToSave:{}
+        annotationToSave:{},
+        currentSelectedPatient:null
       }
       
       this.handleRangeSelection = this.handleRangeSelection.bind(this)
@@ -87,6 +92,11 @@ class Agenda extends Component {
 
       this.closeDialogPatients = this.closeDialogPatients.bind(this)
       this.closeDialogSelection = this.closeDialogSelection.bind(this)
+
+      this.selectPatient = this.selectPatient.bind(this)
+
+      this.openAppointmentsModal = this.openAppointmentsModal.bind(this)
+      this.closeAppointmentsModal = this.closeAppointmentsModal.bind(this)
   }
 
   componentDidMount(){
@@ -159,6 +169,14 @@ class Agenda extends Component {
 
   closeDialogPatients(){
     this.setState({ ...this.state, openPatientsModal:false })
+  }
+
+  openAppointmentsModal(){
+    this.setState({ ...this.state, openAppointmentsModal:true })
+  }
+
+  closeAppointmentsModal(){
+    this.setState({ ...this.state, openAppointmentsModal:false })
   }
 
 
@@ -368,13 +386,18 @@ class Agenda extends Component {
     
   }
 
+  selectPatient(patient){
+    this.setState({...this.state, currentSelectedPatient:patient})
+    this.openAppointmentsModal()
+  }
+
 
   render() {
 
-    var AgendaItem = function(props){
+    /*var AgendaItem = function(props){
       console.log( ' item component props' , props)
       return <div style={{display:'block', position:'absolute' , background:'#FFF'}}>{props.item.name} <button onClick={()=> props.edit(props.item)}>Edit </button></div>
-    }
+    }*/
     return (
 
       <div className="content-expanded ">
@@ -542,7 +565,16 @@ class Agenda extends Component {
           <Grid  container>            
 
             <Grid item lg={12} md={12} xs={12}>
-              <Button color="primary" variant="contained" fullWidth  onClick={ () => this.setState({ ...this.state, openPatientsModal:true }) } >
+              <Button color="primary" variant="contained" fullWidth  onClick={ () => {
+
+                if(moment(this.state.selected[0]).isBefore(moment(), "day"))
+                {
+                  alert("No puede agendar citas previas al tiempo actual")
+                }else{
+                  this.setState({ ...this.state, openPatientsModal:true })
+                }
+                
+               }} >
                  Agendar cita
               </Button>
             </Grid>
@@ -559,8 +591,20 @@ class Agenda extends Component {
         </DialogContent>    
       </Dialog>
 
-      <PatientsModal open={this.state.openPatientsModal}  patients={ this.props.patients }
+      <PatientsModal open={this.state.openPatientsModal} selectPatient={this.selectPatient}  patients={ this.props.patients }
         handleClose={this.closeDialogPatients} />
+
+      <AppointmentsModal 
+          open={ this.state.openAppointmentsModal }
+          auth={ this.props.authState }
+          doctors={ [] }
+          handleClose={ this.closeAppointmentsModal }
+          handleOpen={ this.openAppointmentsModal }
+          saveAppointment={ this.props.saveAppointment }
+          saveMedicine={ this.props.saveMedicine }
+          getAppointmentsByPatientAndDate={ this.props.getAppointmentsByPatientAndDate }
+          getMedicinesByAppointment ={ this.props.getMedicinesByAppointment }
+          patient = { this.state.currentSelectedPatient }  />
 
     </div>
 
@@ -575,11 +619,16 @@ const mapStateToProps = state => {
   return {
     patients,
     selectedPatient, 
-    appState: state.app
+    appState: state.app,
+    authState: state.auth
   };
 }
 
 export default  connect(mapStateToProps, { getAgendaAnnotations,
    saveAgendaAnnotation,
    getAppointments,
-   getPatients })(Agenda)
+   getPatients,
+   saveAppointment,
+   saveMedicine,
+   getAppointmentsByPatientAndDate,
+   getMedicinesByAppointment })(Agenda)

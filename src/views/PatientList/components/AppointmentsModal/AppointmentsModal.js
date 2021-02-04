@@ -64,7 +64,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-const PatientsModal = props => {
+const AppointmentsModal = props => {
 
     const AntSwitch = withStyles((theme) => ({
         root: {
@@ -801,4 +801,4 @@ const PatientsModal = props => {
 };
 
 
-export default PatientsModal;
+export default AppointmentsModal;

@@ -5,7 +5,7 @@ import 'date-fns';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/styles';
 
-import { PatientsToolbar, PatientsTable, PatientsModal  } from './components';
+import { PatientsToolbar, PatientsTable, AppointmentsModal  } from './components';
 
 import { connect } from 'react-redux';
 
@@ -280,7 +280,7 @@ class PatientList extends Component{
           addSelectedPatient={this.addSelectedPatient} 
           patients={this.state.patients} />
         </div>
-        <PatientsModal open={ this.state.open }
+        <AppointmentsModal open={ this.state.open }
           auth={ this.props.authState }
           doctors={ this.props.doctorsState.doctors }
           handleClose={ this.handleClose }
@@ -289,7 +289,7 @@ class PatientList extends Component{
           saveMedicine={ this.props.saveMedicine }
           getAppointmentsByPatientAndDate={ this.props.getAppointmentsByPatientAndDate }
           getMedicinesByAppointment ={ this.props.getMedicinesByAppointment }
-         patient = { this.state.selectedPatient }  />
+          patient = { this.state.selectedPatient }  />
       </div>
     );  
   }
