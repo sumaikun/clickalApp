@@ -34,6 +34,8 @@ import { withStyles } from '@material-ui/core/styles';
 
 import { debounce } from "lodash";
 
+import Swal from 'sweetalert2' 
+
 const useStyles = makeStyles(theme => ({
   root: {},
   content: {
@@ -65,6 +67,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const AppointmentsModal = props => {
+
+    //console.log("props",props)
+
+    //console.log("default date", props.defaultDate , moment().toISOString())
 
     const AntSwitch = withStyles((theme) => ({
         root: {
@@ -124,7 +130,9 @@ const AppointmentsModal = props => {
     medicines:[],
     doctor:null,
     haveMedicalTest:false,
-    _id:null
+    _id:null,
+    agendaAnnotation:null,
+    appointmentDate:null
   })
 
   const [avaliableCieCodes, setAvaliableCieCodes] = useState([])
@@ -248,9 +256,9 @@ const AppointmentsModal = props => {
 
   const saveAppointment = () => {
 
-    console.log("appintment",appointment)
+    //console.log("appintment",appointment)
 
-    console.log("medicines",medicines)   
+    //console.log("medicines",medicines)   
 
       const copyArray = []
 
@@ -306,7 +314,7 @@ const AppointmentsModal = props => {
       //console.log("medicines",medicines)  
       
       props.saveAppointment({
-        patient:props.patient._id,
+        patient:props.patient?._id || props.patient,
         state:'DONE',
         appointmentDate:moment().format("YYYY-MM-DD HH:mm:ss"),
         ...appointment
@@ -349,7 +357,36 @@ const AppointmentsModal = props => {
 
   const handleSubmit2 = (e) => {
     e.preventDefault();
-    console.log('Event: Form Submit');
+    
+    const finalDate = appointment.appointmentDate || props.defaultDate
+
+    console.log("finalDate",finalDate)
+
+    const dataToSend = {
+        patient:props.patient?._id || props.patient,
+        state:'PENDING',
+        appointmentDate:moment( finalDate ).format("YYYY-MM-DD HH:mm:ss"),
+        agendaAnnotation:appointment.agendaAnnotation
+    }
+    
+    props.saveAppointment(dataToSend,(success,error)=>{
+          if(success)
+          {                    
+            handleClose(true)
+
+            window.setTimeout(()=>{
+                Swal.fire("ok","cita agendada","success")
+            },300)
+
+          }
+          if(error)
+          {
+            setErrorTitle("Espera no puedo guardar la cita")
+            setAppointmentErrors(  ["Sucedio un error con el servidor"]  )  
+            handleDialogOpen()
+          }
+      })
+    
   };
 
   //** filter helper for very huge array */
@@ -363,8 +400,8 @@ const AppointmentsModal = props => {
   },1500), []);
 
 
-  const handleClose = () => {
-    props.handleClose()
+  const handleClose = ( flag = null ) => {
+    props.handleClose(flag)
   }
 
   
@@ -372,7 +409,7 @@ const AppointmentsModal = props => {
         <div>
             <Dialog
                 open={open}              
-                onClose={handleClose}
+                onClose={()=>handleClose()}
                 aria-labelledby="alert-dialog-slide-title"
                 aria-describedby="alert-dialog-slide-description"
             >
@@ -383,7 +420,7 @@ const AppointmentsModal = props => {
                 </DialogContentText>
                 <Divider></Divider>
 
-                { props.auth?.user.specialistType &&
+                { props.auth?.userType == 2 &&  moment(props.defaultDate).isSame(moment(), 'day') &&
                 <ExpansionPanel style={{ backgroundColor:"#1b2458" }} >  
                     <ExpansionPanelSummary
                     expandIcon={<ExpandMoreIcon />}
@@ -666,66 +703,72 @@ const AppointmentsModal = props => {
                 </ExpansionPanel>
                 }
 
-                
+                { !moment(props.defaultDate).isSame(moment(), 'day') &&
                 <ExpansionPanel>  
-                <ExpansionPanelSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel1a-content"
-                id="panel1a-header"
-                >
-                <Typography className={classes.heading}>Agendar Cita</Typography>
-                </ExpansionPanelSummary>
-                <ExpansionPanelDetails>
-                    <Divider></Divider>
-                    <form ref={frmCompleteService2} onSubmit={handleSubmit2}> 
-                    <Grid  container spacing={3}>
-                        <Grid item md={12} xs={12}>
-                            <TextField
-                            id="datetime-local"
-                            label="Proxima cita"
-                            type="datetime-local"
-                            defaultValue={ moment().toISOString() }
-                            className={classes.textField}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            />
-                        </Grid>
-                        <Grid item md={12} xs={12}>
-                            <TextField  fullWidth  label="Información a tener en cuenta" margin="dense" name="description"  variant="outlined"
-                                multiline rows={3} />          
-                        </Grid>
-                        
-                        { props.auth?.user.role &&
-                        <Grid item xs={12}>
-                                <Autocomplete
-                                    id="combo-box-demo"
-                                    //searchText="example"
-                                    options={doctors}
-                                    getOptionLabel={(option) => option.name +" "+option.lastName+",id:"+option.identification+",cel:"+option.phone }
-                                    //onChange={(event, values)=>AutoCompleteChange(event, values,"laboratory")}
-                                    renderInput={(params) => 
-                                        <TextField {...params} label="Médico"
-                                            margin="dense"                           
-                                            variant="outlined" />}                                
-                                        />
-                        </Grid>
-                        }
+                    <ExpansionPanelSummary
+                    expandIcon={<ExpandMoreIcon />}
+                    aria-controls="panel1a-content"
+                    id="panel1a-header"
+                    >
+                    <Typography className={classes.heading}>Agendar Cita</Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                        <Divider></Divider>
+                        <form ref={frmCompleteService2} onSubmit={handleSubmit2}> 
+                        <Grid  container spacing={3}>
+                            <Grid item md={12} xs={12}>
+                                <TextField
+                                id="datetime-local"
+                                label="Proxima cita"
+                                type="datetime-local"
+                                defaultValue={ props.defaultDate || moment().toISOString() }
+                                className={classes.textField}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                name="appointmentDate"
+                                onChange={(event)=>{ handleChange(event , null)  }} 
+                                />
+                            </Grid>
+                            <Grid item md={12} xs={12}>
+                                <TextField  fullWidth  label="Información a tener en cuenta"
+                                    margin="dense" name="agendaAnnotation"  variant="outlined" required
+                                    onChange={(event)=>{ handleChange(event , null)  }} 
+                                    value={  appointment.agendaAnnotation  }
+                                    multiline rows={3} />          
+                            </Grid>
+                            
+                            { props.auth?.user.role &&
+                                <Grid item xs={12}>
+                                        <Autocomplete
+                                            required
+                                            id="combo-box-demo"
+                                            //searchText="example"
+                                            options={doctors}
+                                            getOptionLabel={(option) => option.name +" "+option.lastName+",id:"+option.identification+",cel:"+option.phone }
+                                            //onChange={(event, values)=>AutoCompleteChange(event, values,"laboratory")}
+                                            renderInput={(params) => 
+                                                <TextField {...params} label="Médico"
+                                                    margin="dense"                           
+                                                    variant="outlined" />}                                
+                                                />
+                                </Grid>
+                            }
 
-                        <Grid tem md={12} xs={12}>
-                            <Button fullWidth
-                            color="primary"
-                            variant="contained"
-                                                
-                            >
-                            Guardar
-                            </Button>
+                            <Grid tem md={12} xs={12}>
+                                <Button fullWidth
+                                color="primary"
+                                variant="contained"
+                                type="submit"                 
+                                >
+                                Guardar
+                                </Button>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                    </form>
-                </ExpansionPanelDetails>
+                        </form>
+                    </ExpansionPanelDetails>
                 </ExpansionPanel>        
-
+                }
                 
 
 
@@ -733,7 +776,7 @@ const AppointmentsModal = props => {
             
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleClose} color="primary">
+                <Button onClick={()=>handleClose()} color="primary">
                 Cerrar
                 </Button>       
             </DialogActions>

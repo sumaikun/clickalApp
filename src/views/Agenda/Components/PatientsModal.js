@@ -56,7 +56,7 @@ const PatientsModal = props => {
   useEffect(() => {
       console.log("patients",props.patients)
     setFilteredPatients(patients)
-  },[]); 
+  },[patients]); 
   
   const addFilterText = event => {
     //console.log("filter text",event.target.value)

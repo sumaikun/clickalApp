@@ -31,10 +31,11 @@ var now = new Date();
 require('moment/locale/es.js');
     var colors= {
       'color-1':"rgba(102, 195, 131 , 1)" ,
-      "color-2":"rgba(242, 177, 52, 1)" ,
+      "annotation-color":"rgba(25, 39, 72, 1)" ,
       "color-3":"rgba(235, 85, 59, 1)" ,
       "color-4":"rgba(70, 159, 213, 1)",
-      "color-5":"rgba(170, 59, 123, 1)"
+      "color-5":"rgba(170, 59, 123, 1)",
+      "appointment-color":"#3f51b5"
     }
 
 
@@ -97,62 +98,97 @@ class Agenda extends Component {
 
       this.openAppointmentsModal = this.openAppointmentsModal.bind(this)
       this.closeAppointmentsModal = this.closeAppointmentsModal.bind(this)
+
+
+      this.proccessServerAppointments = this.proccessServerAppointments.bind(this)
+      this.proccessServerAnnotations = this.proccessServerAnnotations.bind(this)
   }
 
   componentDidMount(){
 
-    this.setState({items:items})
+    //this.setState({items:items})
 
-    this.props.getPatients()
+    this.props.getPatients()  
+    this.proccessServerAppointments()
+    this.proccessServerAnnotations()  
 
+  }
+
+  proccessServerAppointments(){
+    this.props.getAppointments((success,error)=>{
+      if(success){
+        success.forEach(element => {
+
+          const index = items.findIndex( item => item._id == element._id )
+
+          if(index != -1)
+          {
+            items[index] = {
+              _id            :element._id,
+              name          : element.patientDetails && element.patientDetails[0]?.name,
+              startDateTime : new Date(element.appointmentDate),
+              endDateTime   : moment(element.appointmentDate).add(1, 'hours'),
+              classes       : 'appointment-color',
+              type: 'appointment',
+              meta:element
+            }
+          }else{
+            items.push({
+              _id            :element._id,
+              name          : element.patientDetails && element.patientDetails[0]?.name,
+              startDateTime : new Date(element.appointmentDate),
+              endDateTime   : moment(element.appointmentDate).add(1, 'hours'),
+              classes       : 'appointment-color',
+              type: 'appointment',
+              meta:element
+            })
+          }
+
+        });
+
+        //console.log("items",items)
+        this.setState({items:items})
+
+      }      
+    })
+  }
+
+  proccessServerAnnotations(){
     this.props.getAgendaAnnotations((success,error)=>{
       if(success){
         console.info("agenda annotations",success)
         success.forEach(element =>{
-          items.push({
-            _id            :element._id,
-            name          : element.title,
-            startDateTime : new Date(element.annotationDate),
-            endDateTime   : new Date(element.annotationToDate),
-            classes       : 'color-2',
-            type: 'annotation',
-            meta:element
-          })
+
+          const index = items.findIndex( item => item._id == element._id )
+
+          if(index != -1)
+          {
+            items[index] = {
+              _id            :element._id,
+              name          : element.title,
+              startDateTime : new Date(element.annotationDate),
+              endDateTime   : new Date(element.annotationToDate),
+              classes       : 'annotation-color',
+              type: 'annotation',
+              meta:element
+            }
+          }else{
+            items.push({
+              _id            :element._id,
+              name          : element.title,
+              startDateTime : new Date(element.annotationDate),
+              endDateTime   : new Date(element.annotationToDate),
+              classes       : 'annotation-color',
+              type: 'annotation',
+              meta:element
+            })
+          }
+          
         })
 
+        this.setState({items:items})
       }      
     })
-
-    this.props.getAppointments((success,error)=>{
-      if(success){
-        console.info("appointments",success)
-        success.forEach(element => {
-          //console.log(element.date.split(".")[0])
-          
-          let appointmentDate
-          
-          if(element.state === "pending")
-          {
-            appointmentDate = new Date(element.appointmentDate.split(".")[0])
-          }
-          else{
-            appointmentDate = new Date(element.date.split(".")[0])
-          }
-          
-          //console.log(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), appointmentDate.getHours())
-          items.push({
-             _id            :element._id,
-             name          : element.patientDetails[0]?.name,
-             startDateTime : new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), appointmentDate.getHours(), appointmentDate.getMinutes()),
-             endDateTime   : new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate(), appointmentDate.getHours()+1, appointmentDate.getMinutes()),
-             classes       : 'color-5',
-             type: 'appointment',
-             meta:element
-           })
-        });
-      }      
-    })
-
   }
 
   closeDialog(){
@@ -175,16 +211,27 @@ class Agenda extends Component {
     this.setState({ ...this.state, openAppointmentsModal:true })
   }
 
-  closeAppointmentsModal(){
-    this.setState({ ...this.state, openAppointmentsModal:false })
+  closeAppointmentsModal(flag){
+    console.log("flag",flag)
+    this.setState({ ...this.state,
+      openAppointmentsModal:false,
+      openSelectionModal:false
+    })
+    if(flag)
+    {
+      //this.proccessServerAnnotations()
+      this.proccessServerAppointments()
+    }
   }
 
 
   componentWillReceiveProps(next , last){
+    
     if(next.items){
 
       this.setState({items:next.items})
     }
+    
   }
 
   handleItemEdit(item, openModal) {
@@ -195,6 +242,9 @@ class Agenda extends Component {
 
     if(item.type === "appointment")
     {
+
+      console.log("item",item)
+
       this.setState({
         ...this.state,
         open:true,
@@ -263,13 +313,14 @@ class Agenda extends Component {
 
   handleRangeSelection (selected) {
 
-      console.log("handleRangeSelection",selected,this.state)
-      
-      this.setState({selected:selected , showCtrl:true,annotationToSave:{
+      //console.log("handleRangeSelection",selected,this.state)
+
+      const annotationToSave = JSON.parse(JSON.stringify({
         annotationDate:selected[0],
         annotationToDate:selected[1]
-      }})
-      this._openModal();
+      }))
+      
+      this.setState({...this.state, selected:selected , showCtrl:true, annotationToSave },()=> this._openModal() )
 
   }
 
@@ -279,6 +330,8 @@ class Agenda extends Component {
     //console.log("selected",this.state)
 
     //this.setState({openNotesModal:true})
+
+    console.log("this.state",this.state)
 
     this.setState({ ...this.state, openSelectionModal:true })
   }
@@ -294,16 +347,50 @@ class Agenda extends Component {
 
   handleItemChange(items , item){
 
-    console.log("item changed",item)
-    if(item.type === "appointment")
+    //console.log("item changed",item)
+    //console.log(item.meta.state)
+    if(item.type === "appointment" && item.meta.state != "PENDING" )
     {
+
+      const { meta } = item
+
+      const index = items.findIndex( item => item._id == meta._id )
+
+      if(index != -1)
+      {
+        items[index] = {
+          _id            :meta._id,
+          name          : meta.patientDetails && meta.patientDetails[0]?.name,
+          startDateTime : new Date(meta.appointmentDate),
+          endDateTime   : moment(meta.appointmentDate).add(1, 'hours'),
+          classes       : 'appointment-color',
+          type: 'appointment',
+          meta:meta
+        }
+      }
+      
+      this.setState({items:items})
+
       return Swal.fire({
         icon: 'warning',
         title: 'Espera',
-        text: "No puede modificarse la fecha de una cita del calendario",          
+        text: "No puede modificarse la fecha de una cita del calendario que ha sido confirmada, cancelada o terminada",          
       })
+
     }
     else{
+      if(item.type === "appointment")
+      {
+        //console.log("this.state",moment(item.startDateTime).format("YYYY-MM-DD HH:mm:ss"))
+        this.props.saveAppointment({ ...item.meta, appointmentDate:moment(item.startDateTime).format("YYYY-MM-DD HH:mm:ss") })
+        //saveAppointment
+      }
+      if(item.type === "annotation")
+      {
+        //console.log("item",item)
+        this.props.saveAgendaAnnotation({ ...item.meta, annotationDate:moment(item.startDateTime).format("YYYY-MM-DD HH:mm:ss"),
+        annotationToDate:moment(item.endDateTime).format("YYYY-MM-DD HH:mm:ss")  })
+      }
       this.setState({items:items})
     }
   }
@@ -358,11 +445,12 @@ class Agenda extends Component {
     })
   };
 
-  saveAgendaAnnotation(){
+  saveAgendaAnnotation(e){
+    e.preventDefault()
     console.log("agenda annotation",this.state.annotationToSave)
     if( !this.state.annotationToSave.title || !this.state.annotationToSave.description )
     {
-      this.setState({openNotesModal:false})
+      this.setState({openNotesModal:false,openSelectionModal:false})
       Swal.fire({
           icon: 'warning',
           title: 'Espera',
@@ -374,12 +462,13 @@ class Agenda extends Component {
       this.props.saveAgendaAnnotation(this.state.annotationToSave,(success,error)=>{
         if(success)
         {
-          this.setState({openNotesModal:false})
+          this.setState({openNotesModal:false,openSelectionModal:false})
           Swal.fire({
             icon: 'success',
             title: 'Bien',
             text: "Datos registrados",          
           })  
+          this.proccessServerAnnotations()
         }
       })
     }
@@ -387,8 +476,32 @@ class Agenda extends Component {
   }
 
   selectPatient(patient){
-    this.setState({...this.state, currentSelectedPatient:patient})
-    this.openAppointmentsModal()
+    //console.log("select patient",patient)
+
+    let validation = false
+    
+    this.state.items.map( item => {
+      
+      if(item.type === "appointment"){
+        
+        if( moment(item.meta.appointmentDate).diff( moment(this.state.selected[0]), 'days') == 0 &&
+            item.meta.patient == patient
+          )
+        {
+          validation = true
+        }
+      }
+    })
+
+    if(validation){
+      this.setState({ openSelectionModal:false },() => Swal.fire("Espera","ya existe una cita agendada para el mismo paciente el mismo dia","warning"))
+    }else{
+      this.setState({...this.state, currentSelectedPatient:patient},()=>{
+        console.log("this.state",this.state)
+        this.openAppointmentsModal()
+      })
+    }    
+    
   }
 
 
@@ -437,15 +550,16 @@ class Agenda extends Component {
           onCellSelect={this.handleCellSelection.bind(this)}
           onItemRemove={this.removeEvent.bind(this)}
           onDateRangeChange={this.handleDateRangeChange.bind(this)} />
+
         {
-          this.state.showModal? <Modal clickOutside={this._closeModal} >
-          <div className="modal-content">
-             <ReactAgendaCtrl items={this.state.items} itemColors={colors} selectedCells={this.state.selected} Addnew={this.addNewEvent} edit={this.editEvent}  />
-
-          </div>
-   </Modal>:''
-}
-
+          this.state.showModal &&
+          <Modal clickOutside={this._closeModal} >
+            <div className="modal-content">
+              <ReactAgendaCtrl items={this.state.items} itemColors={colors} selectedCells={this.state.selected}
+               Addnew={this.addNewEvent} edit={this.editEvent}  />
+            </div>
+          </Modal>
+        }
 
       <Dialog
         open={this.state.open}
@@ -462,7 +576,7 @@ class Agenda extends Component {
               <Table>
                 <TableHead>
                     <TableRow>                  
-                      <TableCell>Veterinario/a</TableCell>
+                      <TableCell>Doctor/a</TableCell>
                       <TableCell>Paciente</TableCell>
                       <TableCell>Motivo de la consulta</TableCell>
                       <TableCell>Resultados de la consulta</TableCell>
@@ -471,7 +585,7 @@ class Agenda extends Component {
                 </TableHead>
                 <TableBody>
                     <TableRow>                  
-                      <TableCell>{ this.state.appointmentDetails?.userDetails[0]?.name }</TableCell>
+                      <TableCell>{ this.state.appointmentDetails?.doctorDetails[0]?.name }</TableCell>
                       <TableCell>{ this.state.appointmentDetails?.patientDetails[0]?.name }</TableCell>
                       <TableCell>{ this.state.appointmentDetails?.reasonForConsultation }</TableCell>
                       <TableCell>{ this.state.appointmentDetails?.resultsForConsultation }</TableCell>
@@ -495,61 +609,69 @@ class Agenda extends Component {
           Nueva nota
         </DialogTitle>
         <DialogContent>
-          <Grid  container>
-            
-            <Grid item lg={12} md={12} xs={12}>
-                <TextField  fullWidth  label="Titulo de la nota" margin="dense"
-                name="title" value={this.state.annotationToSave.title} variant="outlined"
-                onChange={this.handleChange}
+
+        <form onSubmit={this.saveAgendaAnnotation} >
+          <Grid  container>            
+
+              <Grid item lg={12} md={12} xs={12}>
+                  <TextField  fullWidth  label="Titulo de la nota" margin="dense"
+                  required
+                  name="title" value={this.state.annotationToSave.title} variant="outlined"
+                  onChange={this.handleChange}
+                  />
+              </Grid>
+              
+              <Grid item lg={12} md={12} xs={12}>
+                  <TextField  fullWidth  label="Descripción de la nota" margin="dense"
+                  required
+                  name="description" value={this.state.annotationToSave.description}
+                  onChange={this.handleChange}
+                  variant="outlined"
+                  multiline rows={3} />
+              </Grid>
+
+              <Grid item lg={6} md={6} xs={12}>
+                <TextField
+                  id="datetime-local"
+                  label="Fecha inicio"
+                  type="datetime-local"
+                  defaultValue="2017-05-24T10:30"
+                  name="annotationDate"
+                  value={this.state.annotationToSave.annotationDate}
+                  onChange={this.handleChange}
+                  InputLabelProps={{
+                      shrink: true,
+                  }}
+                  required
                 />
-            </Grid>
+              </Grid>
+
+              <Grid item lg={6} md={6} xs={12}>
+                <TextField
+                  id="datetime-local"
+                  label="Fecha final"
+                  type="datetime-local"
+                  defaultValue="2017-05-24T10:30"
+                  name="annotationToDate"
+                  value={this.state.annotationToSave.annotationToDate}
+                  onChange={this.handleChange}
+                  InputLabelProps={{
+                      shrink: true,
+                  }}
+                  required
+                />
+              </Grid>
+              
+
+              <Grid item lg={12} md={12} xs={12}>
+                <Button color="primary" variant="contained" type="submit" style={{marginTop:"10px"}} >
+                    Guardar
+                </Button>
+              </Grid>        
             
-            <Grid item lg={12} md={12} xs={12}>
-                <TextField  fullWidth  label="Descripción de la nota" margin="dense"
-                name="description" value={this.state.annotationToSave.description}
-                onChange={this.handleChange}
-                variant="outlined"
-                multiline rows={3} />
-            </Grid>
-
-            <Grid item lg={6} md={6} xs={12}>
-              <TextField
-                id="datetime-local"
-                label="Fecha inicio"
-                type="datetime-local"
-                defaultValue="2017-05-24T10:30"
-                name="annotationDate"
-                value={this.state.annotationToSave.annotationDate}
-                onChange={this.handleChange}
-                InputLabelProps={{
-                    shrink: true,
-                }}
-              />
-            </Grid>
-
-            <Grid item lg={6} md={6} xs={12}>
-              <TextField
-                id="datetime-local"
-                label="Fecha final"
-                type="datetime-local"
-                defaultValue="2017-05-24T10:30"
-                name="annotationToDate"
-                value={this.state.annotationToSave.annotationToDate}
-                onChange={this.handleChange}
-                InputLabelProps={{
-                    shrink: true,
-                }}
-              />
-            </Grid>
-            
-
-            <Grid item lg={12} md={12} xs={12}>
-              <Button color="primary" variant="contained" onClick={this.saveAgendaAnnotation}  style={{marginTop:"10px"}} >
-                  Guardar
-              </Button>
-            </Grid>
-
           </Grid>
+        </form>
+
         </DialogContent>    
       </Dialog>
 
@@ -604,7 +726,9 @@ class Agenda extends Component {
           saveMedicine={ this.props.saveMedicine }
           getAppointmentsByPatientAndDate={ this.props.getAppointmentsByPatientAndDate }
           getMedicinesByAppointment ={ this.props.getMedicinesByAppointment }
-          patient = { this.state.currentSelectedPatient }  />
+          patient = { this.state.currentSelectedPatient }
+          defaultDate={this.state.selected[0]}
+          />
 
     </div>
 
@@ -613,6 +737,8 @@ class Agenda extends Component {
 }  
 
 const mapStateToProps = state => {
+
+  
   
   const { patients, selectedPatient } = state.patients
   
