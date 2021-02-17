@@ -529,7 +529,7 @@ class Agenda extends Component {
           minDate={new Date(now.getFullYear(), now.getMonth()-3)}
           maxDate={new Date(now.getFullYear(), now.getMonth()+3)}
           startDate={this.state.startDate}
-          startAtTime={8}
+          startAtTime={6}
           endAtTime={23}
           cellHeight={this.state.cellHeight}
           locale="fr"
