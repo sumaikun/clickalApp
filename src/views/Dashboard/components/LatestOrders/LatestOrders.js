@@ -1,27 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import moment from 'moment';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
-import {
-  Card,
-  CardActions,
-  CardHeader,
-  CardContent,
-  Button,
-  Divider,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Tooltip,
-  TableSortLabel
+import {  Card,  CardActions,  CardHeader,  CardContent,  Divider,  Table,
+  TableBody,  TableCell,  TableHead,  TableRow,  IconButton,  Menu,
+  MenuItem,  TablePagination
 } from '@material-ui/core';
-import ArrowRightIcon from '@material-ui/icons/ArrowRight';
-
-import mockData from './data';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { StatusBullet } from 'components';
 
 const useStyles = makeStyles(theme => ({
@@ -45,17 +32,71 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const statusColors = {
-  delivered: 'success',
-  pending: 'info',
-  refunded: 'danger'
+  DONE: 'black',
+  PENDING: 'warning',
+  CONFIRMED: 'success',
+  CANCELLED: 'danger',
+  "PENDING DOCTOR": 'info',
+  DUE: 'danger'
 };
 
 const LatestOrders = props => {
-  const { className, ...rest } = props;
+
+  //console.log("props appointments",props.appointments)
+
+  const { className,  ...rest } = props;
 
   const classes = useStyles();
 
-  const [orders] = useState(mockData);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [page, setPage] = useState(0);
+  const [appointments, setAppointments] = useState([])
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  String.prototype.ucwords = function() {
+    const str = this.toLowerCase();
+    return str.replace(/(^([a-zA-Z\p{M}]))|([ -][a-zA-Z\p{M}])/g,
+        function($1){
+            return $1.toUpperCase();
+        });
+  }
+
+  const handlePageChange = (event, page) => {
+    console.log("handle change",event,page)
+    setPage(page);
+  };
+
+  const handleRowsPerPageChange = event => {
+    console.log("rows per page event")
+    setRowsPerPage(event.target.value);
+    setPage(0)
+  };
+
+  useEffect(()=>{
+    let data = []
+
+    props.appointments.map( appointment => {
+      data.push({
+        _id:appointment._id,
+        patient: appointment.patientDetails[0] && `${appointment.patientDetails[0].name} ${appointment.patientDetails[0].lastName}` || "",
+        appointmentDate: appointment.appointmentDate,
+        state: appointment.state == "PENDING" || appointment.state == "PENDING DOCTOR"
+        &&  moment(appointment.appointmentDate).isBefore(moment()) ? "DUE" : appointment.state
+      })
+    })
+
+    setAppointments(data)
+
+  },[props.appointments])
 
   return (
     <Card
@@ -72,44 +113,71 @@ const LatestOrders = props => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Order Ref</TableCell>
-                  <TableCell>Customer</TableCell>
-                  <TableCell sortDirection="desc">
-                    <Tooltip
-                      enterDelay={300}
-                      title="Sort"
-                    >
-                      <TableSortLabel
-                        active
-                        direction="desc"
-                      >
-                        Date
-                      </TableSortLabel>
-                    </Tooltip>
-                  </TableCell>
-                  <TableCell>Status</TableCell>
+                  <TableCell>Ref</TableCell>
+                  <TableCell>Paciente</TableCell>
+                  <TableCell>Fecha</TableCell>
+                  <TableCell>Estado</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {orders.map(order => (
+                {appointments.sort((a,b) => new moment(b.appointmentDate).format('YYYYMMDD') - new moment(a.appointmentDate).format('YYYYMMDD')).map(appointment => (
                   <TableRow
                     hover
-                    key={order.id}
+                    key={appointment._id}
                   >
-                    <TableCell>{order.ref}</TableCell>
-                    <TableCell>{order.customer.name}</TableCell>
                     <TableCell>
-                      {moment(order.createdAt).format('DD/MM/YYYY')}
+                      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }} >
+                        <span>{appointment._id && appointment._id.substring(0,11)}</span>
+                        <div>
+                          <IconButton
+                            aria-label="more"
+                            aria-controls="long-menu"
+                            aria-haspopup="true"
+                            onClick={handleClick}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                          <Menu
+                            id="long-menu"
+                            anchorEl={anchorEl}
+                            
+                            open={open}
+                            onClose={handleClose}                         
+                          >
+                            <MenuItem onClick={handleClose}>
+                                <b>Detalle de cita</b>
+                            </MenuItem>
+                            <MenuItem onClick={handleClose}>
+                                <b>Proceder a cita</b>
+                            </MenuItem>
+                            <MenuItem 
+                              onClick={handleClose}>
+                                <b>Confirmar cita</b>
+                            </MenuItem>
+                            <MenuItem onClick={handleClose}>
+                                <b>Cancelar cita</b>
+                            </MenuItem>                          
+                          </Menu>
+                        </div>
+                      </div>                      
                     </TableCell>
                     <TableCell>
+                      { appointment.patient }
+                    </TableCell>
+                    <TableCell>
+                      { moment(appointment.appointmentDate).format('DD/MM/YYYY HH:mm') }
+                    </TableCell>
+                    <TableCell>
+                      
                       <div className={classes.statusContainer}>
                         <StatusBullet
                           className={classes.status}
-                          color={statusColors[order.status]}
+                          color={statusColors[appointment.state]}
                           size="sm"
                         />
-                        {order.status}
+                        { appointment.state.ucwords() }
                       </div>
+                      
                     </TableCell>
                   </TableRow>
                 ))}
@@ -120,13 +188,15 @@ const LatestOrders = props => {
       </CardContent>
       <Divider />
       <CardActions className={classes.actions}>
-        <Button
-          color="primary"
-          size="small"
-          variant="text"
-        >
-          Ver todos <ArrowRightIcon />
-        </Button>
+        <TablePagination
+            component="div"
+            count={appointments.length}
+            onChangePage={handlePageChange}
+            onChangeRowsPerPage={handleRowsPerPageChange}
+            page={page}
+            rowsPerPage={rowsPerPage}
+            rowsPerPageOptions={[5, 10, 25]}
+        />       
       </CardActions>
     </Card>
   );

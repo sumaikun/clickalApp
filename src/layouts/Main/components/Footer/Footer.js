@@ -32,7 +32,7 @@ const Footer = props => {
         . 2019
       </Typography>
       <Typography variant="caption">
-        ¡ Sistema de veterinaria para ayuda en la gestión !
+        ¡ Sistema medico para ayuda en la gestión !
       </Typography>
     </div>
   );

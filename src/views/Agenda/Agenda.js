@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import moment from 'moment';
-import { ReactAgenda , ReactAgendaCtrl, guid , getUnique , getLast , getFirst , Modal } from 'react-agenda';
+import { ReactAgenda, ReactAgendaCtrl, Modal } from 'react-agenda';
 import { connect } from 'react-redux';
 import Swal from 'sweetalert2' 
 import { getAgendaAnnotations, saveAgendaAnnotation } from 'actions/agendaAnnotations'
