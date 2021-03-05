@@ -580,6 +580,7 @@ class Agenda extends Component {
                       <TableCell>Paciente</TableCell>
                       <TableCell>Motivo de la consulta</TableCell>
                       <TableCell>Resultados de la consulta</TableCell>
+                      <TableCell>Estado</TableCell>
                       <TableCell>Fecha</TableCell>
                     </TableRow>
                 </TableHead>
@@ -589,8 +590,8 @@ class Agenda extends Component {
                       <TableCell>{ this.state.appointmentDetails?.patientDetails[0]?.name }</TableCell>
                       <TableCell>{ this.state.appointmentDetails?.reasonForConsultation }</TableCell>
                       <TableCell>{ this.state.appointmentDetails?.resultsForConsultation }</TableCell>
-                      <TableCell>{ this.state.appointmentDetails?.date.split(" ")[0]}</TableCell>
-                      
+                      <TableCell>{ this.state.appointmentDetails?.state }</TableCell>
+                      <TableCell>{ this.state.appointmentDetails?.date.split(" ")[0]}</TableCell>                      
                     </TableRow>
                 </TableBody>
               </Table>

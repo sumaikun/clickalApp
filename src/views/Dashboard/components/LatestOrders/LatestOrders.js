@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import clsx from 'clsx';
 import moment from 'moment';
 import PerfectScrollbar from 'react-perfect-scrollbar';
@@ -6,10 +6,13 @@ import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
 import {  Card,  CardActions,  CardHeader,  CardContent,  Divider,  Table,
   TableBody,  TableCell,  TableHead,  TableRow,  IconButton,  Menu,
-  MenuItem,  TablePagination
+  MenuItem,  TablePagination, Dialog, DialogTitle, DialogContent
 } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { StatusBullet } from 'components';
+
+import api from 'middleware/api'
+
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -54,6 +57,9 @@ const LatestOrders = props => {
   const [appointments, setAppointments] = useState([])
   const open = Boolean(anchorEl);
 
+  const [ openInfoDialog, setOpenInfoDialog ] = useState(false)
+  const [ appointmentDetails, setAppointmentDetails ] = useState(null)
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -85,9 +91,12 @@ const LatestOrders = props => {
     let data = []
 
     props.appointments.map( appointment => {
+      console.log("appointment",appointment)
       data.push({
         _id:appointment._id,
         patient: appointment.patientDetails[0] && `${appointment.patientDetails[0].name} ${appointment.patientDetails[0].lastName}` || "",
+        email: appointment.patientDetails[0] && `${appointment.patientDetails[0].email} ` || "",
+        phone: appointment.patientDetails[0] && `${appointment.patientDetails[0].phone} ` || "",
         appointmentDate: appointment.appointmentDate,
         state: appointment.state == "PENDING" || appointment.state == "PENDING DOCTOR"
         &&  moment(appointment.appointmentDate).isBefore(moment()) ? "DUE" : appointment.state
@@ -99,6 +108,7 @@ const LatestOrders = props => {
   },[props.appointments])
 
   return (
+  <Fragment>
     <Card
       {...rest}
       className={clsx(classes.root, className)}
@@ -115,6 +125,8 @@ const LatestOrders = props => {
                 <TableRow>
                   <TableCell>Ref</TableCell>
                   <TableCell>Paciente</TableCell>
+                  <TableCell>Correo</TableCell>
+                  <TableCell>Teléfono</TableCell>
                   <TableCell>Fecha</TableCell>
                   <TableCell>Estado</TableCell>
                 </TableRow>
@@ -144,17 +156,67 @@ const LatestOrders = props => {
                             open={open}
                             onClose={handleClose}                         
                           >
-                            <MenuItem onClick={handleClose}>
+                            <MenuItem onClick={()=>{
+                              setAppointmentDetails(props.appointments.filter( x => x._id == appointment._id )[0])
+                              setOpenInfoDialog(true)
+                              handleClose()
+                            }}>
                                 <b>Detalle de cita</b>
                             </MenuItem>
                             <MenuItem onClick={handleClose}>
                                 <b>Proceder a cita</b>
                             </MenuItem>
                             <MenuItem 
-                              onClick={handleClose}>
+                              onClick={()=>{
+                                
+                                api.getData("confirmAppointment/"+appointment.email)
+                                .then( data => {
+                                  
+                                  Swal.fire({
+                                    icon: 'success',
+                                    title: '',
+                                    text: 'Notificación enviada al cliente',          
+                                  })
+
+                                })
+                                .catch( error => {
+                                  console.log("error",error)
+                                  return Swal.fire({
+                                    icon: 'error',
+                                    title: 'Ooops',
+                                    text: 'Sucedio un error en el servidor',          
+                                  })
+                                })
+
+                                handleClose()
+
+                              }}>
                                 <b>Confirmar cita</b>
                             </MenuItem>
-                            <MenuItem onClick={handleClose}>
+                            <MenuItem onClick={()=>{
+
+                               api.getData("cancelAppointment/"+appointment.email)
+                               .then( data => {
+                                 
+                                 Swal.fire({
+                                   icon: 'success',
+                                   title: '',
+                                   text: 'Notificación enviada al cliente',          
+                                 })
+
+                               })
+                               .catch( error => {
+                                 console.log("error",error)
+                                 return Swal.fire({
+                                   icon: 'error',
+                                   title: 'Ooops',
+                                   text: 'Sucedio un error en el servidor',          
+                                 })
+                               })
+
+                               handleClose()
+                               
+                            }}>
                                 <b>Cancelar cita</b>
                             </MenuItem>                          
                           </Menu>
@@ -165,8 +227,14 @@ const LatestOrders = props => {
                       { appointment.patient }
                     </TableCell>
                     <TableCell>
-                      { moment(appointment.appointmentDate).format('DD/MM/YYYY HH:mm') }
+                        { appointment.email }
                     </TableCell>
+                    <TableCell>
+                        { appointment.phone }
+                    </TableCell>
+                    <TableCell>
+                      { moment(appointment.appointmentDate).format('DD/MM/YYYY HH:mm') }
+                    </TableCell>                   
                     <TableCell>
                       
                       <div className={classes.statusContainer}>
@@ -199,6 +267,50 @@ const LatestOrders = props => {
         />       
       </CardActions>
     </Card>
+
+    <Dialog
+      open={openInfoDialog}
+      onClose={()=>{
+        setOpenInfoDialog(false)
+      }}
+      aria-labelledby="draggable-dialog-title"
+      fullWidth
+      maxWidth="md"
+    >
+    <DialogTitle>
+      Información de cita
+    </DialogTitle>
+    <DialogContent>
+
+      <PerfectScrollbar>
+        <div>
+          <Table>
+            <TableHead>
+                <TableRow>                  
+                  <TableCell>Doctor/a</TableCell>
+                  <TableCell>Paciente</TableCell>
+                  <TableCell>Motivo de la consulta</TableCell>
+                  <TableCell>Resultados de la consulta</TableCell>
+                  <TableCell>Estado</TableCell>
+                  <TableCell>Fecha</TableCell>
+                </TableRow>
+            </TableHead>
+            <TableBody>
+                <TableRow>                  
+                  <TableCell>{  appointmentDetails?.doctorDetails[0] && `${appointmentDetails.doctorDetails[0].name} ${appointmentDetails.doctorDetails[0].lastName}` }</TableCell>
+                  <TableCell>{  appointmentDetails?.patientDetails[0] && `${appointmentDetails.patientDetails[0].name} ${appointmentDetails.patientDetails[0].lastName}` }</TableCell>
+                  <TableCell>{  appointmentDetails?.reasonForConsultation }</TableCell>
+                  <TableCell>{  appointmentDetails?.resultsForConsultation }</TableCell>
+                  <TableCell>{  appointmentDetails?.state }</TableCell>
+                  <TableCell>{  appointmentDetails?.appointmentDate.split(" ")[0]}</TableCell>                      
+                </TableRow>
+            </TableBody>
+          </Table>
+        </div> 
+      </PerfectScrollbar>   
+    </DialogContent>
+  </Dialog>  
+</Fragment>
   );
 };
 
