@@ -10,9 +10,9 @@ import {  Card,  CardActions,  CardHeader,  CardContent,  Divider,  Table,
 } from '@material-ui/core';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { StatusBullet } from 'components';
-
+import Swal from 'sweetalert2'
 import api from 'middleware/api'
-
+import AppointmentsModal from 'views/PatientList/components/AppointmentsModal'
 
 const useStyles = makeStyles(theme => ({
   root: {},
@@ -45,7 +45,7 @@ const statusColors = {
 
 const LatestOrders = props => {
 
-  //console.log("props appointments",props.appointments)
+  //console.log("props dashboard",props)
 
   const { className,  ...rest } = props;
 
@@ -59,6 +59,8 @@ const LatestOrders = props => {
 
   const [ openInfoDialog, setOpenInfoDialog ] = useState(false)
   const [ appointmentDetails, setAppointmentDetails ] = useState(null)
+
+  const [ openAppointmentsModal, setOpenAppointmentsModal ] = useState(false)
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -91,7 +93,7 @@ const LatestOrders = props => {
     let data = []
 
     props.appointments.map( appointment => {
-      console.log("appointment",appointment)
+      //console.log("appointment",appointment)
       data.push({
         _id:appointment._id,
         patient: appointment.patientDetails[0] && `${appointment.patientDetails[0].name} ${appointment.patientDetails[0].lastName}` || "",
@@ -151,8 +153,7 @@ const LatestOrders = props => {
                           </IconButton>
                           <Menu
                             id="long-menu"
-                            anchorEl={anchorEl}
-                            
+                            anchorEl={anchorEl}                            
                             open={open}
                             onClose={handleClose}                         
                           >
@@ -163,59 +164,100 @@ const LatestOrders = props => {
                             }}>
                                 <b>Detalle de cita</b>
                             </MenuItem>
-                            <MenuItem onClick={handleClose}>
+                            <MenuItem onClick={()=>{                             
+
+                              if( moment(appointment.appointmentDate).isSame(new Date(), "day") && 
+                                ( appointment.state == "PENDING" || appointment.state == "PENDING DOCTOR"
+                                || appointment.state == "CONFIRMED" )
+                              )
+                              {
+                                setAppointmentDetails(props.appointments.filter( x => x._id == appointment._id )[0])
+                                setOpenAppointmentsModal(true)
+                                handleClose()
+                              }else{
+                                Swal.fire("Espera","Esta cita no puede procesarse ¡ Solo citas pendientes y confirmadas ! ","warning")
+                              }
+                              
+                            }}>
                                 <b>Proceder a cita</b>
                             </MenuItem>
                             <MenuItem 
                               onClick={()=>{
-                                
-                                api.getData("confirmAppointment/"+appointment.email)
-                                .then( data => {
-                                  
+
+                                if( appointment.state == "PENDING" || appointment.state == "PENDING DOCTOR"  ){
+
                                   Swal.fire({
-                                    icon: 'success',
-                                    title: '',
-                                    text: 'Notificación enviada al cliente',          
-                                  })
+                                    title: '¿Esta seguro de confirmar la cita?',
+                                    text: "Este proceso no podra revertirse!",
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                  }).then((result) => {
+                                    
+                                    api.getData("confirmAppointment/"+appointment.email)
+                                    .then( data => {
+  
+                                    Swal.fire({
+                                      icon: 'success',
+                                      title: '',
+                                      text: 'Notificación enviada al cliente',          
+                                    })
+  
+                                    })
+                                    .catch( error => {
+                                      console.log("error",error)
+                                      return Swal.fire({
+                                        icon: 'error',
+                                        title: 'Ooops',
+                                        text: 'Sucedio un error en el servidor',          
+                                      })
+                                    })
+                                    
+                                  })                                
 
-                                })
-                                .catch( error => {
-                                  console.log("error",error)
-                                  return Swal.fire({
-                                    icon: 'error',
-                                    title: 'Ooops',
-                                    text: 'Sucedio un error en el servidor',          
-                                  })
-                                })
-
-                                handleClose()
+                                  handleClose()
+                                }else{
+                                  Swal.fire("Espera","Esta cita no puede confirmarse, ¡solo citas pendientes!","warning")
+                                }                                
 
                               }}>
                                 <b>Confirmar cita</b>
                             </MenuItem>
                             <MenuItem onClick={()=>{
 
-                               api.getData("cancelAppointment/"+appointment.email)
-                               .then( data => {
-                                 
-                                 Swal.fire({
-                                   icon: 'success',
-                                   title: '',
-                                   text: 'Notificación enviada al cliente',          
-                                 })
+                              if( appointment.state == "PENDING" || appointment.state == "PENDING DOCTOR"  ){
 
-                               })
-                               .catch( error => {
-                                 console.log("error",error)
-                                 return Swal.fire({
-                                   icon: 'error',
-                                   title: 'Ooops',
-                                   text: 'Sucedio un error en el servidor',          
-                                 })
-                               })
+                                Swal.fire({
+                                  title: '¿Esta seguro de cancelar la cita?',
+                                  text: "Este proceso no podra revertirse!",
+                                  icon: 'warning',
+                                  showCancelButton: true,
+                                }).then((result) => {
 
-                               handleClose()
-                               
+                                    api.getData("cancelAppointment/"+appointment.email)
+                                    .then( data => {
+                                      
+                                      Swal.fire({
+                                        icon: 'success',
+                                        title: '',
+                                        text: 'Notificación enviada al cliente',          
+                                      })
+
+                                    })
+                                    .catch( error => {
+                                      console.log("error",error)
+                                      return Swal.fire({
+                                        icon: 'error',
+                                        title: 'Ooops',
+                                        text: 'Sucedio un error en el servidor',          
+                                      })
+                                    })
+
+                                })
+
+                                handleClose()
+                              }else{
+                                Swal.fire("Espera","Esta cita no puede cancelarse, ¡solo citas pendientes!","warning")
+                              }   
                             }}>
                                 <b>Cancelar cita</b>
                             </MenuItem>                          
@@ -310,6 +352,26 @@ const LatestOrders = props => {
       </PerfectScrollbar>   
     </DialogContent>
   </Dialog>  
+
+
+  <AppointmentsModal 
+          open={ openAppointmentsModal }
+          auth={ props.authState }
+          doctors={ [] }
+          handleClose={()=>{
+            setOpenAppointmentsModal(false)
+          }}
+          handleOpen={()=>{
+            setOpenAppointmentsModal(true)
+          }}
+          saveAppointment={ props.saveAppointment }
+          saveMedicine={ props.saveMedicine }
+          getAppointmentsByPatientAndDate={ props.getAppointmentsByPatientAndDate }
+          getMedicinesByAppointment ={ props.getMedicinesByAppointment }
+          patient = {  appointmentDetails?.patientDetails[0] }
+  />
+  
+
 </Fragment>
   );
 };

@@ -68,7 +68,7 @@ const useStyles = makeStyles(theme => ({
 
 const AppointmentsModal = props => {
 
-    //console.log("props",props)
+    console.log("props",props)
 
     //console.log("default date", props.defaultDate , moment().toISOString())
 
@@ -145,6 +145,7 @@ const AppointmentsModal = props => {
 
       if(props.patient)
       {
+        //if is required setting default date would bring the appointment information from that day
         props.getAppointmentsByPatientAndDate(props.patient._id,moment().format("Y-M-D"),
             (success,error)=>{
                 if(success && success[0])

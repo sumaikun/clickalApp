@@ -565,6 +565,8 @@ class Agenda extends Component {
         open={this.state.open}
         onClose={this.closeDialog}
         aria-labelledby="draggable-dialog-title"
+        fullWidth
+        maxWidth="md"
       >
         <DialogTitle>
           Información de cita
@@ -582,6 +584,7 @@ class Agenda extends Component {
                       <TableCell>Resultados de la consulta</TableCell>
                       <TableCell>Estado</TableCell>
                       <TableCell>Fecha</TableCell>
+                      { moment(this.state.appointmentDetails?.appointmentDate).isSame(new Date(), "day") && <TableCell>Opciones</TableCell> }
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -591,7 +594,16 @@ class Agenda extends Component {
                       <TableCell>{ this.state.appointmentDetails?.reasonForConsultation }</TableCell>
                       <TableCell>{ this.state.appointmentDetails?.resultsForConsultation }</TableCell>
                       <TableCell>{ this.state.appointmentDetails?.state }</TableCell>
-                      <TableCell>{ this.state.appointmentDetails?.date.split(" ")[0]}</TableCell>                      
+                      <TableCell>{ this.state.appointmentDetails?.appointmentDate.split(" ")[0] || this.state.appointmentDetails?.date.split(" ")[0] }</TableCell>
+                      { moment(this.state.appointmentDetails?.appointmentDate).isSame(new Date(), "day") && 
+                      <TableCell>
+                        <Button color="primary" variant="contained" style={{ fontSize:12 }}
+                          onClick={()=>{
+                            this.setState({openAppointmentsModal:true})
+                          }}
+                        >Ir a cita</Button>  
+                      </TableCell>
+                      }                      
                     </TableRow>
                 </TableBody>
               </Table>
@@ -729,7 +741,7 @@ class Agenda extends Component {
           getMedicinesByAppointment ={ this.props.getMedicinesByAppointment }
           patient = { this.state.currentSelectedPatient }
           defaultDate={this.state.selected[0]}
-          />
+      />
 
     </div>
 

@@ -6,7 +6,8 @@ import {
   //LatestProducts,
   LatestOrders
 } from './components';
-import { getAppointments } from 'actions/appointments'
+import { getAppointments, saveAppointment, getAppointmentsByPatientAndDate } from 'actions/appointments'
+import { saveMedicine, getMedicinesByAppointment } from 'actions/medicines'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -29,7 +30,7 @@ const Dashboard = (props) => {
         spacing={4}
       >      
         
-        <LatestOrders appointments={props.appointments} />
+        <LatestOrders {...props}  />
         
       </Grid>
     </div>
@@ -41,8 +42,13 @@ const mapStateToProps = state => {
   const { appointments } = state.appointments
 
   return {
-   appointments
+   appointments,
+   authState: state.auth
   };
 }
 
-export default connect(mapStateToProps, { getAppointments })(Dashboard);
+export default connect(mapStateToProps, { getAppointments,
+   saveAppointment,
+   getAppointmentsByPatientAndDate,
+   saveMedicine,
+   getMedicinesByAppointment})(Dashboard);
