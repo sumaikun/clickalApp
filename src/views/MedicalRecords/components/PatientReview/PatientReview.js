@@ -12,14 +12,6 @@ import {
 } from '@material-ui/core';
 import Swal from 'sweetalert2'
 
-
-const useStyles = {
-  root: {},
-  horizontalGroup:{width: 'auto', height: 'auto', display: 'flex', flexWrap: 'nowrap',
-  flexDirection: 'row'}
-};
-
-
 const AntSwitch = withStyles((theme) => ({
     root: {
       width: 28,
@@ -189,13 +181,12 @@ const PatientReview = props => {
 
   const frmCompleteService = useRef();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Event: Form Submit');
-  };
-
   return (
-    <form ref={frmCompleteService} onSubmit={handleSubmit}> 
+    <form ref={frmCompleteService} onSubmit={(e)=>{
+        e.preventDefault();
+        console.log('Event: Form Submit');
+        console.info("values",values)
+    }}> 
     <Grid container>          
         
         <Typography variant="subtitle2">Antecedentes</Typography>
@@ -290,7 +281,7 @@ const PatientReview = props => {
                 multiline
                 rows={3}
                 onChange={handleChange}
-                value={ values.surgeris }
+                value={ values.toxicBackground }
                 helperText={rules("toxicBackground",values.toxicBackground)}
                 error = {rules("toxicBackground",values.toxicBackground)}
                 required = { values.haveToxicBackground }
@@ -316,7 +307,7 @@ const PatientReview = props => {
                 margin="dense"
                 name="allergies"
                 variant="outlined"
-                disabled={!values.allergies}
+                disabled={!values.haveAllergies}
                 multiline
                 rows={3}
                 onChange={handleChange}
@@ -349,7 +340,7 @@ const PatientReview = props => {
                 <Grid component="label" container alignItems="center" spacing={1}>
                     <Grid item>¿ realiza ejercicio ? No</Grid>
                     <Grid item>
-                        <AntSwitch  onChange={handleChange}  checked={ values.haveSurgeris }name="haveSurgeris" />
+                        <AntSwitch  onChange={handleChange}  checked={ values.performPhysicalActivity }name="performPhysicalActivity" />
                     </Grid>
                     <Grid item>Si</Grid>
                 </Grid>
@@ -414,7 +405,7 @@ const PatientReview = props => {
                 variant="outlined"
                 type="number"
                 onChange={handleChange}
-                value={ values.childBirdths }
+                value={ values.childBirths }
                 disabled={ !values.haveChildBirths }              
                 required = { values.haveChildBirths }
                 style={{width:"99%"}}
@@ -480,54 +471,7 @@ const PatientReview = props => {
         </Grid>
         
         <Grid  container direction="row" justify="center" alignItems="center">        
-            <Button type="submit" color="primary" variant="contained" style={{marginTop:"10px"}} 
-                onClick={(e)=>{
-
-                    //e.preventDefault();
-                    //const validation = frmCompleteService.current.submit();
-
-                    //console.info("validation",validation)
-
-                    /*console.info("values",values)
-                    
-                    console.log("errors",errors)
-
-                    let errorValidation = false
-
-                    errors.forEach(data => {
-                        if(data != false){  errorValidation = true  }
-                    })
-
-                    if(errorValidation)
-                    {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Espera',
-                            text: "Tienes error en los datos suministrados, revisalos",          
-                        })
-
-                    }else{
-
-                        if(values.feedingType === null || values.habitat === null
-                            || values.reproductiveState === null
-                            || values.previousIllnesses === ""
-                            || values.surgeris === ""
-                            || values.familyBackground === ""){
-
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Espera',
-                                text: "No has puesto los datos obligatorios (tipo de alimentación, estado reproductivo, enfermedades anteriores, cirugias, habitat, antecedentes familiares)",          
-                            })
-
-                        }else{
-                            console.log("time to send")
-                            props.saveOrUpdatePatientReview(values)
-                        }
-                        
-                    }*/
-                    
-                }}>
+            <Button color="primary"  type="submit" variant="contained" style={{marginTop:"10px"}} >
                 Guardar
             </Button>
         </Grid>

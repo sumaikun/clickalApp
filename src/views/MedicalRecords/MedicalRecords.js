@@ -48,10 +48,6 @@ const MedicalRecords = props => {
 
   const [currentPatientId, setCurrentPatientId] = useState(props.appState.currentPatient) 
 
-  //const [values,setValues] = useState({})
-
-  const [products,setProducts] = useState(null)
-
   const [patientReview, setPatientReview] = useState(null)
 
   const [physiologicalConstant, setPhysiologicalConstant] = useState(null)
@@ -60,11 +56,7 @@ const MedicalRecords = props => {
 
   const [diagnosticPlans, setDiagnosticPlans] = useState([])
 
-  const [therapeuticPlans, setTherapeuticPlans] = useState([])
-
   const [appointments, setAppointments] = useState([])
-
-  const [detectedDiseases, setDetectedDiseases] = useState([])
 
   const [patientFiles, setPatientFiles] = useState([])
 
@@ -88,16 +80,7 @@ const MedicalRecords = props => {
 
     if(mounted)
     {
-      props.getProducts((success,error)=>{
-        if(success)
-        {
-          setProducts(props.productsState.products)
-        }
-        if(error){
-          alert("Sucedio un error trayendo los productos")
-        }
-      })
-  
+
       props.getPatientReviewsByPatient(currentPatientId,(success,error)=>{
         
         if(success)
@@ -160,22 +143,7 @@ const MedicalRecords = props => {
 
       })
 
-      props.getTherapeuticPlansByPatient(currentPatientId,(success,error)=>{
-        
-        if(success)
-        {
-            console.log("therapeutic plans success",success)
 
-            if(success.length > 0)
-            {
-              setTherapeuticPlans(success)
-            }
-        }
-        if(error){
-          alert("Sucedio un error trayendo los planes terapeuticos")
-        }
-
-      })
 
       props.getAppointmentsByPatient(currentPatientId,(success,error)=>{
         
@@ -186,23 +154,6 @@ const MedicalRecords = props => {
             if(success.length > 0)
             {
               setAppointments(success)
-            }
-        }
-        if(error){
-          alert("Sucedio un error trayendo las citas")
-        }
-
-      })
-
-      props.getDetectedDiseasesByPatient(currentPatientId,(success,error)=>{
-        
-        if(success)
-        {
-            console.log(" success",success)
-
-            if(success.length > 0)
-            {
-              setDetectedDiseases(success)
             }
         }
         if(error){
@@ -391,56 +342,6 @@ const MedicalRecords = props => {
     })
   }
 
-  const saveOrUpdateTherapeuticPlan = (values,cb) =>{ 
-    
-    console.log("therapeutic plan to save",values)
-
-    values.patient = currentPatientId
-    
-    if(idTPToSave)
-    {
-      if(!values._id)
-      {
-        values._id = idTPToSave
-      }
-
-    }
-  
-    props.saveTherapeuticPlan(values,(res,err)=>{       
-        
-      if(res){
-        console.log("res end point",res)
-        
-        if(res.data && res.data.id)
-        {
-            setIdTPToSave(res.data.id)
-        }
-
-        props.getTherapeuticPlansByPatient(currentPatientId,(success,error)=>{
-          
-            if(success)
-            {
-                if(success.length > 0)
-                {                
-                  setTherapeuticPlans(success)  
-                }    
-            }
-
-        })  
-        
-        return Swal.fire({
-          icon: 'success',
-          title: 'Bien',
-          text: "Datos registrados",          
-        }).then( any => {
-          if(cb){ cb() }
-        })
-
-      }            
-      
-    })
-  }
-
 
   const saveOrUpdateAppointment = (values,cb) =>{ 
     
@@ -493,57 +394,6 @@ const MedicalRecords = props => {
       
     })
   }
-
-  const saveOrUpdateDetectedDisease = (values,cb) =>{ 
-    
-    console.log("detectedDisease to save",values)
-
-    values.patient = currentPatientId
-    
-    if(idDDToSave)
-    {
-      if(!values._id)
-      {
-        values._id = idDDToSave
-      }
-
-    }
-  
-    props.saveDetectedDisease(values,(res,err)=>{       
-        
-      if(res){
-        console.log("res end point",res)
-        
-        if(res.data && res.data.id)
-        {
-            setIdDDToSave(res.data.id)
-        }
-
-        props.getDetectedDiseasesByPatient(currentPatientId,(success,error)=>{
-          
-            if(success)
-            {
-                if(success.length > 0)
-                {                
-                  setDetectedDiseases(success)  
-                }    
-            }
-
-        })  
-        
-        return Swal.fire({
-          icon: 'success',
-          title: 'Bien',
-          text: "Datos registrados",          
-        }).then( any => {
-          if(cb){ cb() }
-        })
-
-      }            
-      
-    })
-  }
-
 
   const saveOrUpdatePatientFile = (values,cb) =>{ 
     
@@ -654,7 +504,7 @@ const MedicalRecords = props => {
             
         </ExpansionPanel>
 
-        <ExpansionPanel>
+        {/*<ExpansionPanel>
             <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel2a-content"
@@ -670,7 +520,7 @@ const MedicalRecords = props => {
               }
             </ExpansionPanelDetails>
             
-        </ExpansionPanel>
+          </ExpansionPanel>*/}
 
         <ExpansionPanel>
             <ExpansionPanelSummary
@@ -688,7 +538,7 @@ const MedicalRecords = props => {
         </ExpansionPanel>
 
 
-        <ExpansionPanel>
+        {/*<ExpansionPanel>
             <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel2a-content"
@@ -701,7 +551,7 @@ const MedicalRecords = props => {
                 saveOrUpdateDetectedDisease={saveOrUpdateDetectedDisease} />
             </ExpansionPanelDetails>
             
-        </ExpansionPanel>
+        </ExpansionPanel>*/}
 
         <ExpansionPanel>
             <ExpansionPanelSummary
@@ -725,7 +575,9 @@ const MedicalRecords = props => {
 
 
 const mapStateToProps = state => {
- 
+  
+  console.log("state",state)
+
   return {
     //petsState: state.pets,
     appState: state.app,

@@ -367,6 +367,29 @@ const FormDetails = props => {
                 disabled={ mode === "watch" }
               />
             </Grid>
+
+            <Grid item md={6} xs={12}>
+              <TextField
+                fullWidth
+                label="Sexo"
+                margin="dense"
+                name="sex"
+                onChange={handleChange}
+                required
+                select
+                // eslint-disable-next-line react/jsx-sort-props
+                SelectProps={{ native: true }}
+                InputLabelProps={{ shrink: !!props.patientDetails.typeId }}
+                value={props.patientDetails.sex}  
+                variant="outlined"
+                disabled={ mode === "watch" }
+              >
+                <option  value={""}></option>
+                <option key={"M"} value={"M"}>Masculino</option>
+                <option key={"F"} value={"F"}>Femenino</option>
+              
+              </TextField>
+            </Grid>       
           
           </Grid>
         </CardContent>

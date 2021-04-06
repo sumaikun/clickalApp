@@ -67,27 +67,6 @@ const DiagnosticPlan = props => {
 
   const classes = doStyles(); 
 
-  const [ examTypes, setExamTypes ] = useState([]);
-
-
-
-  useEffect(() => {
-
-    const getExamTypes = async () => {
-      const response = await api.getData("examTypes") 
-
-      let arrayData = [{label:"",value:""}]
-      console.log(response.data)
-      response.data.forEach( data => arrayData.push({label:data.name,value:data._id}) )
-      setExamTypes(arrayData) 
-
-    }
-
-    getExamTypes()
-
-  },[])
-
-
   const [open, setOpen] = useState(false);
 
   const [open2, setOpen2] = useState(false);
@@ -224,9 +203,7 @@ const DiagnosticPlan = props => {
                 {  props.diagnosticPlans ? props.diagnosticPlans.slice(0).reverse().map( plan => (
                     <TableRow>
                       <TableCell>
-                        {
-                           examTypes.length > 0 ? examTypes.filter( type => type.value === plan.typeOfExam  )[0].label  : null                         
-                        }
+                        {}
                       </TableCell>
                       <TableCell>{plan.description}</TableCell>
                       <TableCell>{plan.examDate}</TableCell>
@@ -280,25 +257,7 @@ const DiagnosticPlan = props => {
                 <Grid  container>
 
                   <Grid item md={12} xs={12}>
-                      <TextField
-                          fullWidth label="Tipo de examen"
-                          margin="dense" name="typeOfExam"
-                          required
-                          select                                   
-                          variant="outlined"
-                          SelectProps={{ native: true }}
-                          onChange={handleChange}
-                          value={values.typeOfExam}
-                      >
-                          {examTypes.map(option => (
-                          <option
-                              key={option.value}
-                              value={option.value}
-                          >
-                              {option.label}
-                          </option>
-                          ))}
-                      </TextField>
+                     
                   </Grid>
 
                   <Grid item md={12} xs={12}>

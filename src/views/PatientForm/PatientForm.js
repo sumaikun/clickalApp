@@ -46,7 +46,8 @@ const PatientForm = props => {
     stratus:props.patientsState.selectedPatient.stratus || "" , 
     doctors:props.patientsState.selectedPatient.doctors || [], 
     picture: props.patientsState.selectedPatient.picture ? props.patientsState.selectedPatient.picture : null,
-    file: null
+    file: null,
+    sex: props.patientsState.selectedPatient.sex
   });
 
   const changeValues = (key,value) =>
