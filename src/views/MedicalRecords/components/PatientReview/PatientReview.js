@@ -49,8 +49,9 @@ const AntSwitch = withStyles((theme) => ({
 
 const PatientReview = props => {
 
-  
-  //console.info("props pr",props)
+  const { saveOrUpdatePatientReview, patient, patientReview } = props
+
+  //console.log("PatientReview",patientReview)
 
   const handleWindowSizeChange = () => {
     console.log("window size changed",screenWidth)
@@ -106,7 +107,10 @@ const PatientReview = props => {
   window.addEventListener('resize', handleWindowSizeChange);
 
   useEffect(() => {
-  },[]);
+      if(patientReview){
+          setValues({ ...patientReview })
+      }
+  },[patientReview]);
 
   const [screenWidth, setscreenWidth] = useState(window.innerWidth);
 
@@ -186,6 +190,7 @@ const PatientReview = props => {
         e.preventDefault();
         console.log('Event: Form Submit');
         console.info("values",values)
+        saveOrUpdatePatientReview(values)
     }}> 
     <Grid container>          
         
@@ -381,88 +386,94 @@ const PatientReview = props => {
             />
         </Grid>
         
-        <Grid lg={12} md={12} xs={12}>
-            <Typography variant="subtitle2">Información femenina</Typography>
-            <Divider/>
-        </Grid>
+        { patient?.sex === "F" && 
+        <React.Fragment>            
+        
+            <Grid lg={12} md={12} xs={12}>
+                <Typography variant="subtitle2">Información femenina</Typography>
+                <Divider/>
+            </Grid>
 
-        <Grid lg={6} md={6} xs={12}>                  
-            <Typography component="div">
-                <Grid component="label" container alignItems="center" spacing={1}>
-                    <Grid item>¿ Ha tenido partos ? No</Grid>
-                    <Grid item>
-                        <AntSwitch  onChange={handleChange}  checked={ values.haveChildBirths }name="haveChildBirths" />
+            <Grid lg={6} md={6} xs={12}>                  
+                <Typography component="div">
+                    <Grid component="label" container alignItems="center" spacing={1}>
+                        <Grid item>¿ Ha tenido partos ? No</Grid>
+                        <Grid item>
+                            <AntSwitch  onChange={handleChange}  checked={ values.haveChildBirths }name="haveChildBirths" />
+                        </Grid>
+                        <Grid item>Si</Grid>
                     </Grid>
-                    <Grid item>Si</Grid>
-                </Grid>
-            </Typography>
-     
-            <TextField
-                fullWidth
-                label="Partos"
-                margin="dense"
-                name="childBirths"
-                variant="outlined"
-                type="number"
-                onChange={handleChange}
-                value={ values.childBirths }
-                disabled={ !values.haveChildBirths }              
-                required = { values.haveChildBirths }
-                style={{width:"99%"}}
-            />
-        </Grid>
+                </Typography>
+        
+                <TextField
+                    fullWidth
+                    label="Partos"
+                    margin="dense"
+                    name="childBirths"
+                    variant="outlined"
+                    type="number"
+                    onChange={handleChange}
+                    value={ values.childBirths }
+                    disabled={ !values.haveChildBirths }              
+                    required = { values.haveChildBirths }
+                    style={{width:"99%"}}
+                />
+            </Grid>
 
-        <Grid lg={6} md={6} xs={12}>
-            <Typography component="div">
-                <Grid component="label" container alignItems="center" spacing={1}>
-                    <Grid item>¿ Ha tenido abortos ? No</Grid>
-                    <Grid item>
-                        <AntSwitch  onChange={handleChange}  checked={ values.haveChildAborts }name="haveChildAborts" />
+            <Grid lg={6} md={6} xs={12}>
+                <Typography component="div">
+                    <Grid component="label" container alignItems="center" spacing={1}>
+                        <Grid item>¿ Ha tenido abortos ? No</Grid>
+                        <Grid item>
+                            <AntSwitch  onChange={handleChange}  checked={ values.haveChildAborts }name="haveChildAborts" />
+                        </Grid>
+                        <Grid item>Si</Grid>
                     </Grid>
-                    <Grid item>Si</Grid>
-                </Grid>
-            </Typography>
-            <TextField
-                fullWidth
-                label="Abortos"
-                margin="dense"
-                name="childAborts"
-                variant="outlined"
-                type="number"
-                onChange={handleChange}
-                value={ values.childAborts }
-                disabled={ !values.haveChildAborts } 
-                required={ values.haveChildAborts }
-            />
-        </Grid>
+                </Typography>
+                <TextField
+                    fullWidth
+                    label="Abortos"
+                    margin="dense"
+                    name="childAborts"
+                    variant="outlined"
+                    type="number"
+                    onChange={handleChange}
+                    value={ values.childAborts }
+                    disabled={ !values.haveChildAborts } 
+                    required={ values.haveChildAborts }
+                />
+            </Grid>
 
-        <Grid lg={12} md={12} xs={12}>            
-            <Typography component="div">
-                <Grid component="label" container alignItems="center" spacing={1}>
-                    <Grid item>¿ su periodo sucede con normalidad ? No</Grid>
-                    <Grid item>
-                        <AntSwitch  onChange={handleChange}  checked={ values.haveMenstruation }name="haveMenstruation" />
+            <Grid lg={12} md={12} xs={12}>            
+                <Typography component="div">
+                    <Grid component="label" container alignItems="center" spacing={1}>
+                        <Grid item>¿ su periodo sucede con normalidad ? No</Grid>
+                        <Grid item>
+                            <AntSwitch  onChange={handleChange}  checked={ values.haveMenstruation }name="haveMenstruation" />
+                        </Grid>
+                        <Grid item>Si</Grid>
                     </Grid>
-                    <Grid item>Si</Grid>
-                </Grid>
-            </Typography>
-        </Grid>
+                </Typography>
+            </Grid>
 
-        <Grid lg={12} md={12} xs={12}>
-            <TextField
-                fullWidth
-                label="Información adicional ginecoobstetrica a tener en cuenta"
-                margin="dense"
-                name="femaleComments"
-                variant="outlined"
-                multiline
-                rows={3}
-                onChange={handleChange}
-                value={ values.femaleComments }
-                helperText={rules("femaleComments",values.femaleComments)}
-                error = {rules("femaleComments",values.femaleComments)}
-            />
-        </Grid>
+            <Grid lg={12} md={12} xs={12}>
+                <TextField
+                    fullWidth
+                    label="Información adicional ginecoobstetrica a tener en cuenta"
+                    margin="dense"
+                    name="femaleComments"
+                    variant="outlined"
+                    multiline
+                    rows={3}
+                    onChange={handleChange}
+                    value={ values.femaleComments }
+                    helperText={rules("femaleComments",values.femaleComments)}
+                    error = {rules("femaleComments",values.femaleComments)}
+                />
+            </Grid>
+
+        </React.Fragment>
+        }
         
         
         <Grid lg={12} md={12} xs={12}>

@@ -76,130 +76,26 @@ const MedicalRecords = props => {
 
   useEffect(() => {
 
-    let mounted = false;   
+    let mounted = true;   
 
     if(mounted)
     {
 
-      props.getPatientReviewsByPatient(currentPatientId,(success,error)=>{
-        
-        if(success)
-        {
-            //if(props.patienReviewState.patientReviews[0])
-            if(success[0])
-            {
-              setPatientReview(success[0])
-            }
-            else{
-              setPatientReview(new PatientReviewModel())
-            }    
-            
-           
-        }
-        if(error){
-            alert("Sucedio un error trayendo las reseñas del paciente")
-        }
-
-      })
+      props.getPatientReviewsByPatient(currentPatientId)
   
-      props.getPhysiologicalConstantsByPatient(currentPatientId,(success,error)=>{
-        
-        if(success)
-        {
-            //console.info("physiological constants",props.constantsState)
+      //props.getPhysiologicalConstantsByPatient(currentPatientId)
 
-            console.log("constants success",success)
+      //props.getDiagnosticPlansByPatient(currentPatientId)
 
-            if(success.length > 0)
-            {
-              setPhysiologicalConstant(success[success.length - 1]) 
-              setPhysiologicalConstants(success)
+      //props.getAppointmentsByPatient(currentPatientId)
 
-            }else{
-              setPhysiologicalConstant(new PhysiologicalConstantModel())
-            }
-
-        }
-        if(error){
-          alert("Sucedio un error trayendo las constantes fisiológicas")
-        }
-
-      })
-
-      props.getDiagnosticPlansByPatient(currentPatientId,(success,error)=>{
-        
-        if(success)
-        {
-            console.log("diagnostic plans success",success)
-
-            if(success.length > 0)
-            {
-              setDiagnosticPlans(success)
-            }
-        }
-        if(error){
-          alert("Sucedio un error trayendo los planes de diagnostico")
-        }
-
-      })
-
-
-
-      props.getAppointmentsByPatient(currentPatientId,(success,error)=>{
-        
-        if(success)
-        {
-            console.log("appointments success",success)
-
-            if(success.length > 0)
-            {
-              setAppointments(success)
-            }
-        }
-        if(error){
-          alert("Sucedio un error trayendo las citas")
-        }
-
-      })
-
-      props.getPatientFilesByPatient(currentPatientId,(success,error)=>{
-        
-        if(success)
-        {
-            console.log(" success",success)
-
-            if(success.length > 0)
-            {
-              setPatientFiles(success)
-            }
-        }
-        if(error){
-          alert("Sucedio un error trayendo las citas")
-        }
-
-      })
+      //props.getPatientFilesByPatient(currentPatientId)
 
       mounted = false
     } 
 
 
   },[]);  
-
-  
-
-  /*const changeValues = (key,value) =>
-  {
-
-    console.log(key,value);
-    setValues({
-      ...values,
-      [key]: value
-    });
-  
-    console.log(values)
-
-    
-  }*/
 
  
   const saveOrUpdatePatientReview = (values) =>{
@@ -460,11 +356,9 @@ const MedicalRecords = props => {
             >
             <Typography className={classes.heading}>Reseña del paciente</Typography>
             </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
+            <ExpansionPanelDetails>            
 
-             
-
-                  <PatientReview  patientReview={ patientReview }
+                  <PatientReview  patientReview={ props.selectedPatientReview } patient={ props.patient }
                   saveOrUpdatePatientReview={saveOrUpdatePatientReview} /> :
                          
 
@@ -576,13 +470,22 @@ const MedicalRecords = props => {
 
 const mapStateToProps = state => {
   
-  console.log("state",state)
+  //console.log("state",state)
+
+  const patient = state.patients.patients.filter(  patient => patient._id == state.app.currentPatient  )[0]
+
+  //console.log("selectedPatient",patient)
+
+  const { selectedPatientReview } = state.patientReviews
+
+  //console.log("selectedPatientReview",selectedPatientReview)
 
   return {
     //petsState: state.pets,
+    patient,
     appState: state.app,
     productsState: state.products,  
-    patienReviewState: state.patientReviews,
+    selectedPatientReview,
     constantsState: state.physiologicalConstants
   };
 }

@@ -18,7 +18,7 @@ import clicalPicture from 'assets/branding/Clicalmedic/logoclic-03.png'
 
 const useStyles = makeStyles(theme => ({
   root: {
-    boxShadow: 'none'
+    boxShadow: 'none',
   },
   flexGrow: {
     flexGrow: 1
