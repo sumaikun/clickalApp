@@ -190,7 +190,24 @@ const PatientReview = props => {
         e.preventDefault();
         console.log('Event: Form Submit');
         console.info("values",values)
-        saveOrUpdatePatientReview(values)
+        let errorValidation = false
+
+        errors.forEach(data => {
+            if(data != false){  errorValidation = true  }
+        })
+
+        if(errorValidation)
+        {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Espera',
+                text: "Tienes error en los datos suministrados, revisalos",          
+            })
+
+        }else{
+            saveOrUpdatePatientReview(values)
+        }
+        
     }}> 
     <Grid container>          
         

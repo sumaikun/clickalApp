@@ -1,6 +1,5 @@
 import 'date-fns';
-import React, { useState  , useEffect  } from 'react';
-import clsx from 'clsx';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/styles';
 import {
@@ -22,7 +21,7 @@ import {
 } from '@material-ui/core';
 import Swal from 'sweetalert2'
 import PerfectScrollbar from 'react-perfect-scrollbar';
-import { PhysiologicalConstant as PhysiologicalConstantModel } from "models/physiologicalConstant";
+import moment from "moment"
 
 const useStyles = {
   root: {},
@@ -45,8 +44,12 @@ const doStyles = makeStyles((theme) => ({
     }
   }));
 
+
 const PhysiologicalConstants = props => {
 
+  const { saveOrUpdatePhysiologicalConstant, selectedPhysiologicalConstant } = props
+  
+  const frmCompleteService = useRef();
     
   const classes = doStyles();
 
@@ -56,7 +59,7 @@ const PhysiologicalConstants = props => {
   const handleChange = event => {
     
     //console.log(event,event.target)
-    console.log(event.target.name,event.target.value,event.target.checked,event.target.type)
+    //console.log(event.target.name,event.target.value,event.target.checked,event.target.type)
     if( event.target.type === "checkbox" )
     {
         setData(event.target.name,event.target.checked)
@@ -68,27 +71,29 @@ const PhysiologicalConstants = props => {
   };
 
   const [values, setValues] = useState({
-    bloodPressure:null,
-    heartRate:null,
-    respiratoryRate:null,
-    oxygenStauration:null,
-    heartBeat:null,
-    temperature:null,
-    weight:null,
-    height:null,
-    hidrationStatus:null,
-    physicalsEye:"",
-    physicalsEars:"",
-    physicalsLinfaticmodules:"",
-    physicalsSkinandanexes:"",
-    physicalsLocomotion:"",
-    physicalsMusclesqueletal:"",
-    physicalsNervoussystem:"",
-    physicalsCardiovascularsystem:"",
-    physicalsRespiratorysystem:"",
-    physicalsDigestivesystem:"",
-    physicalsGenitourinarysystem:""
+    bloodPressure: selectedPhysiologicalConstant.bloodPressure,
+    heartRate: selectedPhysiologicalConstant.heartRate,
+    respiratoryRate: selectedPhysiologicalConstant.respiratoryRate,
+    oxygenSaturation: selectedPhysiologicalConstant.oxygenSaturation,
+    heartBeat: selectedPhysiologicalConstant.heartBeat,
+    temperature: selectedPhysiologicalConstant.temperature,
+    weight: selectedPhysiologicalConstant.weight,
+    height: selectedPhysiologicalConstant.height,
+    hidrationStatus: selectedPhysiologicalConstant.hidrationStatus,
+    physicalsEye: selectedPhysiologicalConstant.physicalsEye || "",
+    physicalsEars: selectedPhysiologicalConstant.physicalsEars || "",
+    physicalsLinfaticmodules: selectedPhysiologicalConstant.physicalsLinfaticmodules || "",
+    physicalsSkinandanexes: selectedPhysiologicalConstant.physicalsSkinandanexes || "",
+    physicalsLocomotion: selectedPhysiologicalConstant.physicalsLocomotion || "",
+    physicalsMusclesqueletal: selectedPhysiologicalConstant.physicalsMusclesqueletal || "",
+    physicalsNervoussystem: selectedPhysiologicalConstant.physicalsNervoussystem || "",
+    physicalsCardiovascularsystem: selectedPhysiologicalConstant.physicalsCardiovascularsystem || "",
+    physicalsRespiratorysystem: selectedPhysiologicalConstant.physicalsRespiratorysystem || "",
+    physicalsDigestivesystem: selectedPhysiologicalConstant.physicalsDigestivesystem || "",
+    physicalsGenitourinarysystem: selectedPhysiologicalConstant.physicalsGenitourinarysystem || ""
   })
+
+  const [ saveMode, setSaveMode ] = useState()
 
   //const [values, setValues] = useState(props.physiologicalConstant)
 
@@ -193,7 +198,44 @@ const PhysiologicalConstants = props => {
 
   return (
     <Grid lg={12} md={12} xs={12}>
-         <Grid
+        <form onSubmit={(e)=>{
+            e.preventDefault()
+            console.log("form submit")
+            console.info("values",values)
+            let errorValidation = false
+
+            errors.forEach(data => {
+                if(data != false){  errorValidation = true  }
+            })
+
+            if(errorValidation)
+            {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Espera',
+                    text: "Tienes error en los datos suministrados, revisalos",          
+                })
+
+            }else{           
+                
+                console.log("saveMode",saveMode)
+
+                if(saveMode === 1){
+                    
+                    saveOrUpdatePhysiologicalConstant({ ...values, _id:selectedPhysiologicalConstant.id })
+                }
+
+                if(saveMode === 2){
+                    delete values.id
+                    delete values._id
+                    console.log("values",values)
+                    saveOrUpdatePhysiologicalConstant(values)
+                }
+                
+            }
+        
+        }}  >
+        <Grid
             container
             direction="row"
             justify="center"
@@ -268,13 +310,13 @@ const PhysiologicalConstants = props => {
                     fullWidth
                     label="Saturación de oxigeno (SpO2)"
                     margin="dense"
-                    name="oxigenSaturation"
+                    name="oxygenSaturation"
                     variant="outlined"
                     InputLabelProps={{
                         className: classes.floatingLabelFocusStyle,
                     }}
                     onChange={handleChange}
-                    value={values.oxigenSaturation}
+                    value={values.oxygenSaturation}
                     type="number"
                     required
                     min={0}
@@ -354,7 +396,7 @@ const PhysiologicalConstants = props => {
                         className: classes.floatingLabelFocusStyle,
                     }}
                     onChange={handleChange}
-                    value={values.temperature}
+                    value={values.height}
                     type="number"
                     required
                     min={0}
@@ -371,7 +413,7 @@ const PhysiologicalConstants = props => {
                     InputLabelProps={{
                         className: classes.floatingLabelFocusStyle,
                     }}
-                    value={ values.weight / ( values.height * values.height ) || 0  }
+                    value={ values.height > 0 && values.weight / ( values.height * values.height ) || 0  }
                     readOnly={true}
                 />
             </Grid>
@@ -554,7 +596,7 @@ const PhysiologicalConstants = props => {
                 onChange={handleChange}
                 value={values.physicalsRespiratorysystem}
                 helperText={rules("physicalsRespiratorysystem",values.physicalsRespiratorysystem)}
-                error = {rules("physicalsCardiovascularsystem",values.physicalsCardiovascularsystem)}
+                error = {rules("physicalsCardiovascularsystem",values.physicalsRespiratorysystem)}
         />
 
         <TextField
@@ -649,70 +691,58 @@ const PhysiologicalConstants = props => {
             </div>
             </PerfectScrollbar>
         </Grid>  
-
-
+        
+        <button ref={frmCompleteService} style={{visibility:"hidden"}} type="submit"> click here </button>
+        </form>
 
         <Typography variant="subtitle2">Opciones</Typography>
         <Divider/>        
         <Grid  container direction="row" justify="space-evenly" alignItems="center">        
             <Button color="primary" variant="contained" style={{marginTop:"10px"}} 
                 onClick={()=>{
-                    console.info("values",values)
-
-                    let errorValidation = false
-
-                    errors.forEach(data => {
-                        if(data != false){  errorValidation = true  }
-                    })
-
-                    if(errorValidation)
-                    {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Espera',
-                            text: "Tienes error en los datos suministrados, revisalos",          
-                        })
-
-                    }else{
-                        if(values.tlic === null || values.heartRate === null
-                            || values.respiratoryRate === null
-                            || values.heartBeat === ""
-                            || values.temperature === ""
-                            || values.weight === ""
-                            || values.attitude === ""
-                            || values.bodyCondition === ""
-                            || values.hidrationStatus === ""){
-
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Espera',
-                                text: "No has puesto los datos obligatorios (T.LI.C, Frecuencia cardiaca, Frecuencia respiratoria, Pulso, Temperatura, Peso, Actitud, Condición corporal, Estado de hidratación)",          
-                            })
-
-                        }
-                        else{
-                            props.saveOrUpdatePhysiologicalConstant(values)
-                        }
-                    }
-
-
-                }}
-            >
+                    setSaveMode(1)
+                    window.setTimeout( ()=>{
+                        frmCompleteService.current.click()
+                    },600)
+                }} >
                 Guardar
             </Button>
             <Button color="primary" variant="contained" style={{marginTop:"10px"}}
                 onClick={()=>{
-                    if(props.physiologicalConstants.length === 0)
-                    {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Espera',
-                            text: "Tienen que haber constantes fisiológicas previas para crear una nueva",          
-                        })
+                    
+                    let checkDay
+
+                    props.physiologicalConstants.map( pConstant => {
+                        checkDay = moment(pConstant.date?.split(" ")[0]).isSame(moment(), 'day')
+                    })
+
+                    if(checkDay){
+                        return Swal.fire("Espera","Ya hubo una constante fisiológica creada hoy no puede crear mas pero si editarla","warning")
+                    }                    
+
+                    if(props.physiologicalConstants.length == 0){
+                        return Swal.fire("Espera","Debe haber al menos una constante fisiológica guardada para continuar","warning")
                     }
-                    else{
-                        setValues( new PhysiologicalConstantModel() )
-                    }
+
+                    Swal.fire({
+                        title: '¿Esta seguro?',
+                        text: "Esto creara un nuevo registro de constante fisiológicas si desea cambiar el actual solo haga click en guardar",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Si, adelante'
+                      }).then((result) => {
+                        if (result.isConfirmed) {
+                            setSaveMode(2)
+                            props.setIdPCToSave(null)
+                            window.setTimeout( ()=>{
+                                frmCompleteService.current.click() 
+                            },600) 
+                        }
+                    })
+
+                                   
                 }}
             >
                 Crear nuevas constantes fisiológicas

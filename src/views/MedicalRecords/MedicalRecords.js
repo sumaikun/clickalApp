@@ -46,15 +46,7 @@ const MedicalRecords = props => {
   
   const classes = useStyles();
 
-  const [currentPatientId, setCurrentPatientId] = useState(props.appState.currentPatient) 
-
-  const [patientReview, setPatientReview] = useState(null)
-
-  const [physiologicalConstant, setPhysiologicalConstant] = useState(null)
-
-  const [physiologicalConstants, setPhysiologicalConstants] = useState([])
-
-  const [diagnosticPlans, setDiagnosticPlans] = useState([])
+  const [currentPatientId] = useState(props.appState.currentPatient) 
 
   const [appointments, setAppointments] = useState([])
 
@@ -64,13 +56,7 @@ const MedicalRecords = props => {
 
   const [ idPCToSave, setIdPCToSave ] = useState(null)
 
-  const [ idDPToSave, setIdDPToSave ] = useState(null)
-
-  const [ idTPToSave, setIdTPToSave ] = useState(null)
-
   const [ idAToSave, setIdAToSave ] = useState(null)
-
-  const [ idDDToSave, setIdDDToSave ] = useState(null)
 
   const [ idPFToSave, setIdPFToSave ] = useState(null)
 
@@ -83,9 +69,7 @@ const MedicalRecords = props => {
 
       props.getPatientReviewsByPatient(currentPatientId)
   
-      //props.getPhysiologicalConstantsByPatient(currentPatientId)
-
-      //props.getDiagnosticPlansByPatient(currentPatientId)
+      props.getPhysiologicalConstantsByPatient(currentPatientId)
 
       //props.getAppointmentsByPatient(currentPatientId)
 
@@ -100,7 +84,7 @@ const MedicalRecords = props => {
  
   const saveOrUpdatePatientReview = (values) =>{
 
-    console.log("patientReview to save",values)
+    //console.log("patientReview to save",values)
 
     values.patient = currentPatientId
     
@@ -138,7 +122,7 @@ const MedicalRecords = props => {
 
   const saveOrUpdatePhysiologicalConstant = (values) =>{
 
-    console.log("constant to save",values)
+    //console.log("constant to save",values)
 
     values.patient = currentPatientId
     
@@ -160,20 +144,8 @@ const MedicalRecords = props => {
         if(res.data && res.data.id)
         {
             setIdPCToSave(res.data.id)
+            props.getPhysiologicalConstantsByPatient(currentPatientId)
         }
-
-        props.getPhysiologicalConstantsByPatient(currentPatientId,(success,error)=>{
-          
-            if(success)
-            {
-                if(success.length > 0)
-                {                
-                  setPhysiologicalConstants(success)  
-                }
-    
-            }
-
-        })  
         
         return Swal.fire({
           icon: 'success',
@@ -186,58 +158,7 @@ const MedicalRecords = props => {
     })
     
   }
-
-
-  const saveOrUpdateDiagnosticPlan = (values,cb) =>{ 
-    
-    console.log("diagnostic plan to save",values)
-
-    values.patient = currentPatientId
-    
-    if(idDPToSave)
-    {
-      if(!values._id)
-      {
-        values._id = idDPToSave
-      }
-      
-    }
   
-    props.saveDiagnosticPlan(values,(res,err)=>{       
-        
-      if(res){
-        console.log("res end point",res)
-        
-        if(res.data && res.data.id)
-        {
-            setIdDPToSave(res.data.id)
-        }
-
-        props.getDiagnosticPlansByPatient(currentPatientId,(success,error)=>{
-          
-            if(success)
-            {
-                if(success.length > 0)
-                {                
-                  setDiagnosticPlans(success)  
-                }    
-            }
-
-        })  
-        
-        return Swal.fire({
-          icon: 'success',
-          title: 'Bien',
-          text: "Datos registrados",          
-        }).then( any => {
-          if(cb){ cb() }
-        })
-
-      }            
-      
-    })
-  }
-
 
   const saveOrUpdateAppointment = (values,cb) =>{ 
     
@@ -375,14 +296,17 @@ const MedicalRecords = props => {
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>                
              
-                <PhysiologicalConstants  physiologicalConstant={ physiologicalConstant }
+                <PhysiologicalConstants
+                setIdPCToSave={setIdPCToSave}
                 saveOrUpdatePhysiologicalConstant={saveOrUpdatePhysiologicalConstant} 
-                physiologicalConstants={physiologicalConstants} />
+                selectedPhysiologicalConstant={props.selectedPhysiologicalConstant}
+                physiologicalConstants={props.physiologicalConstants}
+                patient={ props.patient } />
 
             </ExpansionPanelDetails>            
         </ExpansionPanel>
 
-        <ExpansionPanel>
+        {/*<ExpansionPanel>
             <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel2a-content"
@@ -396,7 +320,7 @@ const MedicalRecords = props => {
                 />
             </ExpansionPanelDetails>
             
-        </ExpansionPanel>
+        </ExpansionPanel>*/}
 
         {/*<ExpansionPanel>
             <ExpansionPanelSummary
@@ -470,7 +394,7 @@ const MedicalRecords = props => {
 
 const mapStateToProps = state => {
   
-  //console.log("state",state)
+  console.log("state",state)
 
   const patient = state.patients.patients.filter(  patient => patient._id == state.app.currentPatient  )[0]
 
@@ -478,15 +402,17 @@ const mapStateToProps = state => {
 
   const { selectedPatientReview } = state.patientReviews
 
+  const { physiologicalConstants, selectedPhysiologicalConstant } = state.physiologicalConstants
+
   //console.log("selectedPatientReview",selectedPatientReview)
 
   return {
     //petsState: state.pets,
     patient,
-    appState: state.app,
-    productsState: state.products,  
+    appState: state.app, 
     selectedPatientReview,
-    constantsState: state.physiologicalConstants
+    physiologicalConstants,
+    selectedPhysiologicalConstant
   };
 }
 
