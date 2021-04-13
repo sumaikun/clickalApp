@@ -5,8 +5,7 @@ import {
     SELECT_PARAMETER
   } from "../constants";
   import api from "middleware/api";
-  import { Breed } from "models/Breed";
-  import { Species } from "models/Species";  
+  
   
   function setParameter(parameters) {
     return {
@@ -133,21 +132,6 @@ import {
       }else{
         
         const expr = modelPoint
-        
-        switch (expr) {
-          case 'breeds':
-            dispatch(selectParameter(
-              new Breed()
-            ));
-            break;
-          case 'species':
-            dispatch(selectParameter(
-              new Species()
-            ));
-            break;        
-          default:
-            console.log('Lo lamentamos, por el momento no disponemos de ' + expr + '.');
-        }
         
         if(cb) { cb(true,false) }
       

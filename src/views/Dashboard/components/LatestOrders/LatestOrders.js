@@ -96,9 +96,9 @@ const LatestOrders = props => {
       //console.log("appointment",appointment)
       data.push({
         _id:appointment._id,
-        patient: appointment.patientDetails[0] && `${appointment.patientDetails[0].name} ${appointment.patientDetails[0].lastName}` || "",
-        email: appointment.patientDetails[0] && `${appointment.patientDetails[0].email} ` || "",
-        phone: appointment.patientDetails[0] && `${appointment.patientDetails[0].phone} ` || "",
+        patient: ( appointment?.patientDetails && appointment?.patientDetails[0] ) && `${appointment.patientDetails[0].name} ${appointment.patientDetails[0].lastName}` || "",
+        email: ( appointment?.patientDetails &&appointment?.patientDetails[0] ) && `${appointment.patientDetails[0].email} ` || "",
+        phone: ( appointment?.patientDetails && appointment?.patientDetails[0] ) && `${appointment.patientDetails[0].phone} ` || "",
         appointmentDate: appointment.appointmentDate,
         state: appointment.state == "PENDING" || appointment.state == "PENDING DOCTOR"
         &&  moment(appointment.appointmentDate).isBefore(moment()) ? "DUE" : appointment.state

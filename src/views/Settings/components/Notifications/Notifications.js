@@ -62,6 +62,7 @@ const AntSwitch = withStyles((theme) => ({
 }))(Switch);
 
 const Notifications = props => {
+
   const { className, doctorSetting, ...rest } = props;
 
   const classes = useStyles();
@@ -69,18 +70,11 @@ const Notifications = props => {
   //console.log("doctorSetting",doctorSetting)
 
   const [ settings, setSettings ] = useState({
-    hoursRange: [450,450],
-    daysRange: [],
-    isScheduling: false
+    hoursRange: doctorSetting?.hoursRange || [450,450],
+    daysRange: doctorSetting?.daysRange || [],
+    isScheduling: doctorSetting?.isScheduling || false,
+    appointmentTime: doctorSetting?.appointmentTime || ""
   })
-
-  useEffect(()=>{
-    setSettings({
-      hoursRange: doctorSetting?.hoursRange || [450,450],
-      daysRange: doctorSetting?.daysRange || [],
-      isScheduling: doctorSetting?.isScheduling || false
-    })
-  },[doctorSetting])
 
   const saveSettings = () => {
     props.saveSetting(settings)
@@ -113,11 +107,7 @@ const Notifications = props => {
         />
         <Divider />
         <CardContent>
-          <Grid
-            container
-            spacing={6}
-            wrap="wrap"
-          >
+          <Grid container spacing={6} wrap="wrap" >
             <Grid
               className={classes.item}
               item
@@ -192,13 +182,7 @@ const Notifications = props => {
              
             </Grid>
 
-            <Grid  
-              className={classes.item}
-              item
-              md={6}
-              sm={6}
-              xs={12}
-            >
+            <Grid className={classes.item} item md={6} sm={6} xs={12}>
               <Typography
                 gutterBottom
                 variant="h6"
@@ -407,13 +391,7 @@ const Notifications = props => {
 
             </Grid>
 
-            <Grid
-              className={classes.item}
-              item
-              md={12}
-              sm={12}
-              xs={12}
-            >
+            <Grid className={classes.item} item md={12} sm={12} xs={12}>
               <Typography
                 gutterBottom
                 variant="h6"
@@ -434,6 +412,35 @@ const Notifications = props => {
                     <Grid item>Si</Grid>
                 </Grid>
              
+            </Grid>
+
+            <Grid className={classes.item} item md={12} sm={12} xs={12}>
+              <Typography
+                gutterBottom
+                variant="h6"
+              >
+                Cual es el valor por defecto de la cita
+              </Typography>
+
+              <TextField
+                fullWidth
+                onChange={ e =>  { 
+                  console.log("e.target.value",e.target.value)
+                  setSettings({ ...settings, appointmentTime:e.target.value  })
+                }}
+                select
+                // eslint-disable-next-line react/jsx-sort-props
+                SelectProps={{ native: true }}
+                InputLabelProps={{ shrink: !!doctorSetting?.appointmentTime }}               
+                variant="outlined"
+              >
+                <option  value={""}></option>
+                <option  value={"30"} selected={ doctorSetting?.appointmentTime == "30" } >30 MINUTOS</option>
+                <option  value={"45"} selected={ doctorSetting?.appointmentTime == "45" } >45 MINUTOS</option>
+                <option  value={"60"} selected={ doctorSetting?.appointmentTime == "60" } >60 MINUTOS</option>
+              
+              </TextField>
+           
             </Grid>
             
           </Grid>

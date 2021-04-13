@@ -13,7 +13,7 @@ import {
     };
   }
 
-  function addAppointment(appointment) {
+  /*function addAppointment(appointment) {
     return {
       type: ADD_APPOINTMENT,   
       appointment
@@ -25,7 +25,7 @@ import {
       type: REMOVE_APPOINTMENT,   
       appointment
     };
-  }
+  }*/
 
   function selectAppointment(appointment){
     return{
@@ -40,7 +40,7 @@ import {
   export function getAppointmentsByPatient(patient,cb=null) {
     
     return dispatch => {
-      return api.getData(modelPoint+"/"+patient)
+      return api.getData("appointmentsByPatient/"+patient)
         .then(( response ) => {
 
           const result = response.data ? response.data : []
@@ -64,7 +64,9 @@ import {
       return api.getData("appointmentsByPatientAndDate"+"/"+patient+"/"+date)
         .then(( response ) => {
 
-          const result = response.data ? response.data : null
+          const result = response.data
+
+          console.log("result",result)
 
           dispatch(selectAppointment(result))
           

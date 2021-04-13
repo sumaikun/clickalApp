@@ -8,21 +8,16 @@ import { Grid, Typography,
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { connect } from 'react-redux';
 import Swal from 'sweetalert2' 
-import { PatientReview, PhysiologicalConstants, DiagnosticPlan,
-  TherapeuticPlan, Appointments, Diseases, PatientFiles  } from './components'
+import { PatientReview, PhysiologicalConstants, Appointments, PatientFiles  } from './components'
 import 'date-fns';
 import { setCurrentPatient } from 'actions/app';
 import { getPatientReviewsByPatient, savePatientReview } from 'actions/patientReviews';
 import { getPhysiologicalConstantsByPatient, savePhysiologicalConstant } from 'actions/pyshiologicalConstants';
-import { getDiagnosticPlansByPatient, saveDiagnosticPlan } from 'actions/diagnosticPlans'
-import { getTherapeuticPlansByPatient, saveTherapeuticPlan } from 'actions/therapeuticPlans'
-import { getAppointmentsByPatient, saveAppointment} from 'actions/appointments'
-import { getDetectedDiseasesByPatient, saveDetectedDisease } from 'actions/detectedDiseases'
+import { getAppointmentsByPatient, saveAppointment, getAppointmentsByPatientAndDate } from 'actions/appointments'
 import { getPatientFilesByPatient, savePatientFile } from 'actions/patientFiles'
-
-import { PatientReview as PatientReviewModel } from "models/patientReview";
-import { PhysiologicalConstant as PhysiologicalConstantModel } from "models/physiologicalConstant"
-
+import { saveMedicine, getMedicinesByAppointment } from 'actions/medicines'
+import { getAgendaAnnotations, saveAgendaAnnotation } from 'actions/agendaAnnotations'
+import AppointmentsModal from 'views/PatientList/components/AppointmentsModal'
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -48,17 +43,19 @@ const MedicalRecords = props => {
 
   const [currentPatientId] = useState(props.appState.currentPatient) 
 
-  const [appointments, setAppointments] = useState([])
-
   const [patientFiles, setPatientFiles] = useState([])
 
   const [ idPRToSave, setIdPRToSave ] = useState(null)
 
   const [ idPCToSave, setIdPCToSave ] = useState(null)
 
-  const [ idAToSave, setIdAToSave ] = useState(null)
-
   const [ idPFToSave, setIdPFToSave ] = useState(null)
+
+  const [ open, setOpen ] = useState()
+
+  const [ appointmenWatch, setAppointmenWatch ] = useState(false)
+
+  const [ watchValues, setWatchValues ] = useState()
 
   useEffect(() => {
 
@@ -71,7 +68,7 @@ const MedicalRecords = props => {
   
       props.getPhysiologicalConstantsByPatient(currentPatientId)
 
-      //props.getAppointmentsByPatient(currentPatientId)
+      props.getAppointmentsByPatient(currentPatientId)
 
       //props.getPatientFilesByPatient(currentPatientId)
 
@@ -158,59 +155,6 @@ const MedicalRecords = props => {
     })
     
   }
-  
-
-  const saveOrUpdateAppointment = (values,cb) =>{ 
-    
-    console.log("appointment to save",values)
-
-    values.patient = currentPatientId
-
-    values.state = "done"
-    
-    if(idAToSave)
-    {
-      if(!values._id)
-      {
-        values._id = idAToSave
-      }
-
-    }
-  
-    props.saveAppointment(values,(res,err)=>{       
-        
-      if(res){
-        console.log("res end point",res)
-        
-        if(res.data && res.data.id)
-        {
-            setIdAToSave(res.data.id)
-        }
-
-        props.getAppointmentsByPatient(currentPatientId,(success,error)=>{
-          
-            if(success)
-            {
-                if(success.length > 0)
-                {                
-                  setAppointments(success)  
-                }    
-            }
-
-        })  
-        
-        return Swal.fire({
-          icon: 'success',
-          title: 'Bien',
-          text: "Datos registrados",          
-        }).then( any => {
-          if(cb){ cb() }
-        })
-
-      }            
-      
-    })
-  }
 
   const saveOrUpdatePatientFile = (values,cb) =>{ 
     
@@ -264,6 +208,7 @@ const MedicalRecords = props => {
 
 
   return (
+    <>
     <div className={classes.root} style={{marginTop:"25px"}}>
         <Typography variant={"h3"} style={{textAlign:"center"}}>Historial Medico { " "+currentPatientId }</Typography>
        
@@ -306,40 +251,6 @@ const MedicalRecords = props => {
             </ExpansionPanelDetails>            
         </ExpansionPanel>
 
-        {/*<ExpansionPanel>
-            <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel2a-content"
-            id="panel2a-header"
-            >
-            <Typography className={classes.heading}>Planes de diagnostico</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
-                <DiagnosticPlan saveOrUpdateDiagnosticPlan={saveOrUpdateDiagnosticPlan}
-                  diagnosticPlans={diagnosticPlans}
-                />
-            </ExpansionPanelDetails>
-            
-        </ExpansionPanel>*/}
-
-        {/*<ExpansionPanel>
-            <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel2a-content"
-            id="panel2a-header"
-            >
-            <Typography className={classes.heading}>Planes terapeuticos</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
-              {
-                products ? <TherapeuticPlan products={products}  
-                therapeuticPlans={therapeuticPlans}
-                saveOrUpdateTherapeuticPlan={saveOrUpdateTherapeuticPlan} /> : false
-              }
-            </ExpansionPanelDetails>
-            
-          </ExpansionPanel>*/}
-
         <ExpansionPanel>
             <ExpansionPanelSummary
             expandIcon={<ExpandMoreIcon />}
@@ -349,27 +260,22 @@ const MedicalRecords = props => {
             <Typography className={classes.heading}>Citas</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>
-              <Appointments appointments={appointments} 
-                saveOrUpdateAppointment={saveOrUpdateAppointment} />
+              <Appointments appointments={props.appointments} 
+                manageNewAppointment={() => {
+                  //console.log("manage new app")
+                  setOpen(true)
+                  setAppointmenWatch(false)
+                }}
+                seeCompleteInfo={ (data) => {
+                  //console.log("complete info", data)
+                  setOpen(true)
+                  setAppointmenWatch(true)
+                  setWatchValues(data)
+                }}
+              />
             </ExpansionPanelDetails>
             
         </ExpansionPanel>
-
-
-        {/*<ExpansionPanel>
-            <ExpansionPanelSummary
-            expandIcon={<ExpandMoreIcon />}
-            aria-controls="panel2a-content"
-            id="panel2a-header"
-            >
-            <Typography className={classes.heading}>Enfermedades detectadas</Typography>
-            </ExpansionPanelSummary>
-            <ExpansionPanelDetails>
-              <Diseases detectedDiseases={detectedDiseases}
-                saveOrUpdateDetectedDisease={saveOrUpdateDetectedDisease} />
-            </ExpansionPanelDetails>
-            
-        </ExpansionPanel>*/}
 
         <ExpansionPanel>
             <ExpansionPanelSummary
@@ -388,13 +294,28 @@ const MedicalRecords = props => {
        
        </div>
     </div>
+
+    <AppointmentsModal 
+          open={ open }
+          auth={ props.authState }
+          doctors={ [] }
+          handleClose={ ()=>setOpen(false) }
+          saveAppointment={ props.saveAppointment }
+          saveMedicine={ props.saveMedicine }
+          getAppointmentsByPatientAndDate={ props.getAppointmentsByPatientAndDate }
+          getMedicinesByAppointment ={ props.getMedicinesByAppointment }
+          patient = { props.patient }
+          watch = { appointmenWatch }
+          watchValues = { watchValues }
+    />  
+    </>
   );
 };
 
 
 const mapStateToProps = state => {
   
-  console.log("state",state)
+  console.log("state mr",state)
 
   const patient = state.patients.patients.filter(  patient => patient._id == state.app.currentPatient  )[0]
 
@@ -404,6 +325,8 @@ const mapStateToProps = state => {
 
   const { physiologicalConstants, selectedPhysiologicalConstant } = state.physiologicalConstants
 
+  const { appointments } = state.appointments
+
   //console.log("selectedPatientReview",selectedPatientReview)
 
   return {
@@ -412,7 +335,9 @@ const mapStateToProps = state => {
     appState: state.app, 
     selectedPatientReview,
     physiologicalConstants,
-    selectedPhysiologicalConstant
+    selectedPhysiologicalConstant,
+    appointments,
+    authState: state.auth
   };
 }
 
@@ -423,14 +348,13 @@ export default  connect(mapStateToProps, {
   getPhysiologicalConstantsByPatient,
   savePatientReview,
   savePhysiologicalConstant,
-  getDiagnosticPlansByPatient,
-  saveDiagnosticPlan,
-  getTherapeuticPlansByPatient,
-  saveTherapeuticPlan,
   getAppointmentsByPatient,
   saveAppointment,
-  getDetectedDiseasesByPatient,
-  saveDetectedDisease,
+  saveMedicine,
+  getMedicinesByAppointment,
   getPatientFilesByPatient,
-  savePatientFile 
+  getAgendaAnnotations,
+  saveAgendaAnnotation,
+  getAppointmentsByPatientAndDate,
+  savePatientFile, 
 } )(MedicalRecords);

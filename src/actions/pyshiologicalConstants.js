@@ -44,6 +44,8 @@ import {
       return api.getData(modelPoint)
         .then(( response ) => {
 
+          //console.log("getPhysiologicalConstants",response)
+
           dispatch(setPhysiologicalConstant(response.data ? response.data : []));
           
           if(cb) { cb(true,false) }
@@ -63,6 +65,8 @@ import {
     return dispatch => {
       return api.getData(modelPoint+"/"+patient)
         .then(( response ) => {
+
+          //console.log("getPhysiologicalConstants",response)
 
           const result = response.data ? response.data : []
 

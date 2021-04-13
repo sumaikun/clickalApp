@@ -48,13 +48,22 @@ const doStyles = makeStyles((theme) => ({
 const PhysiologicalConstants = props => {
 
   const { saveOrUpdatePhysiologicalConstant, selectedPhysiologicalConstant } = props
+
+  //console.log("selectedPhysiologicalConstant",selectedPhysiologicalConstant)
   
   const frmCompleteService = useRef();
     
   const classes = doStyles();
 
   useEffect(() => {
-  },[]); 
+
+    if(selectedPhysiologicalConstant){
+        setValues({ ...selectedPhysiologicalConstant })
+    }else{
+        setValues(initialVlues)
+    }
+
+  },[selectedPhysiologicalConstant]); 
   
   const handleChange = event => {
     
@@ -70,30 +79,32 @@ const PhysiologicalConstants = props => {
 
   };
 
-  const [values, setValues] = useState({
-    bloodPressure: selectedPhysiologicalConstant.bloodPressure,
-    heartRate: selectedPhysiologicalConstant.heartRate,
-    respiratoryRate: selectedPhysiologicalConstant.respiratoryRate,
-    oxygenSaturation: selectedPhysiologicalConstant.oxygenSaturation,
-    heartBeat: selectedPhysiologicalConstant.heartBeat,
-    temperature: selectedPhysiologicalConstant.temperature,
-    weight: selectedPhysiologicalConstant.weight,
-    height: selectedPhysiologicalConstant.height,
-    hidrationStatus: selectedPhysiologicalConstant.hidrationStatus,
-    physicalsEye: selectedPhysiologicalConstant.physicalsEye || "",
-    physicalsEars: selectedPhysiologicalConstant.physicalsEars || "",
-    physicalsLinfaticmodules: selectedPhysiologicalConstant.physicalsLinfaticmodules || "",
-    physicalsSkinandanexes: selectedPhysiologicalConstant.physicalsSkinandanexes || "",
-    physicalsLocomotion: selectedPhysiologicalConstant.physicalsLocomotion || "",
-    physicalsMusclesqueletal: selectedPhysiologicalConstant.physicalsMusclesqueletal || "",
-    physicalsNervoussystem: selectedPhysiologicalConstant.physicalsNervoussystem || "",
-    physicalsCardiovascularsystem: selectedPhysiologicalConstant.physicalsCardiovascularsystem || "",
-    physicalsRespiratorysystem: selectedPhysiologicalConstant.physicalsRespiratorysystem || "",
-    physicalsDigestivesystem: selectedPhysiologicalConstant.physicalsDigestivesystem || "",
-    physicalsGenitourinarysystem: selectedPhysiologicalConstant.physicalsGenitourinarysystem || ""
-  })
+  const initialVlues = {
+    bloodPressure: "",
+    heartRate: "",
+    respiratoryRate: "",
+    oxygenSaturation: "",
+    heartBeat: "",
+    temperature: "",
+    weight: "",
+    height: "",
+    hidrationStatus: "",
+    physicalsEye: "",
+    physicalsEars: "",
+    physicalsLinfaticmodules: "",
+    physicalsSkinandanexes: "",
+    physicalsLocomotion: "",
+    physicalsMusclesqueletal: "",
+    physicalsNervoussystem: "",
+    physicalsCardiovascularsystem: "",
+    physicalsRespiratorysystem: "",
+    physicalsDigestivesystem: "",
+    physicalsGenitourinarysystem: "",
+  }
 
-  const [ saveMode, setSaveMode ] = useState()
+  const [values, setValues] = useState(initialVlues)
+
+  const [ saveMode, setSaveMode ] = useState(initialVlues)
 
   //const [values, setValues] = useState(props.physiologicalConstant)
 
@@ -226,10 +237,11 @@ const PhysiologicalConstants = props => {
                 }
 
                 if(saveMode === 2){
+                    props.physiologicalConstants.map( pc => console.log("pc",pc) )
                     delete values.id
                     delete values._id
                     console.log("values",values)
-                    saveOrUpdatePhysiologicalConstant(values)
+                    //saveOrUpdatePhysiologicalConstant(values)
                 }
                 
             }

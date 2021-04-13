@@ -18,15 +18,26 @@ import {
   
       case SET_PHYSIOLOGICAL_CONSTANTS:
         
-        return Object.assign({}, state, {
+        /*return Object.assign({}, state, {
           physiologicalConstants:action.physiologicalConstants,         
-        });
+        });*/
+
+        console.log("all pyshio constants", action)
+
+        const { physiologicalConstants } = action
+
+        return { 
+            physiologicalConstants,
+            selectedPhysiologicalConstant: physiologicalConstants.length > 0 ? physiologicalConstants[ physiologicalConstants.length -1 ] : null
+        }
   
       case SELECT_PHYSIOLOGICAL_CONSTANT:
-  
-        return Object.assign({}, state, {
+        
+        //console.log("select physiological constant", action)
+        /*return Object.assign({}, state, {
           selectedPhysiologicalConstant:action.physiologicalConstant,         
-        });
+        });*/
+        return { ...state,  selectedPhysiologicalConstant:action.physiologicalConstant  }
   
       case ADD_PHYSIOLOGICAL_CONSTANT:
         

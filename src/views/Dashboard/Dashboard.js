@@ -39,6 +39,8 @@ const Dashboard = (props) => {
 
 const mapStateToProps = state => {
 
+  console.log("state",state)
+
   const { appointments } = state.appointments
 
   return {

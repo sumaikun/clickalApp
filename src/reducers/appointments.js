@@ -12,7 +12,7 @@ import {
   export function appointments(
     state = {
       appointments:[],     
-      selectedAppointment: new Appointment()
+      selectedAppointment: null
     },
     action
   ) {
@@ -27,9 +27,11 @@ import {
       case SELECT_APPOINTMENT:
         
         //console.log("on select action",action)
-        return Object.assign({}, state, {
+        /*return Object.assign({}, state, {
           selectedAppointment:action.appointment,         
-        });
+        });*/
+
+        return { ...state, selectedAppointment:action.appointment }
   
       case ADD_APPOINTMENT:
         

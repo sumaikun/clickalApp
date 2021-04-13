@@ -73,7 +73,7 @@ const PatientReview = props => {
 
   };
 
-  const [values, setValues] = useState({
+  const initialVlues = {
     havePreviousIllness:false,
     previousIllnesses:"",
     haveSurgeris:false,
@@ -92,7 +92,9 @@ const PatientReview = props => {
     haveMenstruation:true,
     femaleComments:"",
     comments:""
-  })
+  }
+
+  const [values, setValues] = useState(initialVlues)
 
   //const [values, setValues] = useState(props.patientReview)
 
@@ -109,6 +111,8 @@ const PatientReview = props => {
   useEffect(() => {
       if(patientReview){
           setValues({ ...patientReview })
+      }else{
+          setValues(initialVlues)
       }
   },[patientReview]);
 
@@ -125,56 +129,56 @@ const PatientReview = props => {
 
         case "previousIllnesses":
 
-            errors[1] = value.length > 0 && value.length < 15 ?
+            errors[1] = value?.length > 0 && value?.length < 15 ?
                 "Las enfermedades anteriores deben tener mas de 15 carácteres" : false       
 
             return  errors[1]
 
         case "surgeris":
 
-            errors[2] = value.length > 0 && value.length < 15 ?
+            errors[2] = value?.length > 0 && value?.length < 15 ?
                 "La información de cirugias debe tener mas de 15 carácteres" : false       
 
             return  errors[2]
 
         case "familyBackground":
 
-            errors[3] = value.length > 0 && value.length < 15 ?
+            errors[3] = value?.length > 0 && value?.length < 15 ?
                 "La información de antecedentes familiares debe tener mas de 15 carácteres" : false       
 
             return  errors[3]
 
         case "toxicBackground":
 
-            errors[4] = value.length > 0 && value.length < 15 ?
+            errors[4] = value?.length > 0 && value?.length < 15 ?
                 "La información de antecedentes toxicos debe tener mas de 15 carácteres" : false       
 
             return  errors[4]
 
         case "allergies":
 
-            errors[5] = value.length > 0 && value.length < 15 ?
+            errors[5] = value?.length > 0 && value?.length < 15 ?
                 "La información de las alergias debe tener mas de 15 carácteres" : false       
 
             return  errors[5]
 
         case "immunizations":
 
-            errors[6] = value.length > 0 && value.length < 15 ?
+            errors[6] = value?.length > 0 && value?.length < 15 ?
                 "La información de las inmunización debe tener mas de 15 carácteres" : false       
 
             return  errors[6] 
         
         case "femaleComments":
 
-            errors[7] = value.length > 0 && value.length < 15 ?
+            errors[7] = value?.length > 0 && value?.length < 15 ?
                 "La información adicional femenina debe tener mas de 15 carácteres" : false       
 
             return  errors[7]         
         
         case "comments":
 
-            errors[8] = value.length > 0 && value.length < 15 ?
+            errors[8] = value?.length > 0 && value?.length < 15 ?
                 "Los comentarios o notas deben tener mas de 15 carácteres" : false       
 
             return  errors[7]   

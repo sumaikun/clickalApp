@@ -68,7 +68,7 @@ const useStyles = makeStyles(theme => ({
 
 const AppointmentsModal = props => {
 
-    console.log("props",props)
+    //console.log("props",props)
 
     //console.log("default date", props.defaultDate , moment().toISOString())
 
@@ -108,7 +108,7 @@ const AppointmentsModal = props => {
 
   const confirm = useConfirm();
 
-  const {  open, handleOpen,  doctors,  ...rest } = props;
+  const {  open, handleOpen,  doctors, watch, watchValues } = props;
 
   const classes = useStyles();
 
@@ -132,7 +132,7 @@ const AppointmentsModal = props => {
     haveMedicalTest:false,
     _id:null,
     agendaAnnotation:null,
-    appointmentDate:null
+    appointmentDate:moment().format("YYYY-MM-DD HH:mm:ss")
   })
 
   const [avaliableCieCodes, setAvaliableCieCodes] = useState([])
@@ -141,12 +141,14 @@ const AppointmentsModal = props => {
 
   const [ errorTitle , setErrorTitle ] = useState(null)
 
-  useEffect(() => {
 
-      if(props.patient)
+
+  useEffect(() => {
+        
+      if(props.patient && !watch)
       {
         //if is required setting default date would bring the appointment information from that day
-        props.getAppointmentsByPatientAndDate(props.patient._id,moment().format("Y-M-D"),
+        props.getAppointmentsByPatientAndDate(props.patient._id,moment().format("Y-MM-D"),
             (success,error)=>{
                 if(success && success[0])
                 {
@@ -171,9 +173,26 @@ const AppointmentsModal = props => {
                 }
             }
         )
+      }else{
+          
       }
       
-  }, [props.patient])
+  }, [props.patient,watch])
+
+  useEffect(()=>{
+    if(watch){
+        setAppointment({ ...watchValues })
+        props.getMedicinesByAppointment(watchValues._id,
+            (success,error)=>{
+
+                setMedicines(success)
+            }
+        )
+    }
+    else{
+        setAppointment({})
+    }
+  },[watch])
 
   /**  Dialogs for notifications */
 
@@ -321,13 +340,16 @@ const AppointmentsModal = props => {
         ...appointment
       },(success,error)=>{
           if(success)
-          {                    
-            setAppointment({ ...appointment, _id:success.data.id })
+          {      
+            if(success.data.id ){
+                setAppointment({ ...appointment, _id:success.data.id })
+            }         
+            
             medicines.map( medicine => {
                 props.saveMedicine({
                     ...medicine,
                     patient:props.patient._id,
-                    appointment:success.data.id
+                    appointment:success.data.id || appointment._id
                 },(success,error)=>{
                     console.log("medicines success",success)
                 })
@@ -348,20 +370,20 @@ const AppointmentsModal = props => {
 
   const frmCompleteService = useRef();
 
+  const frmCompleteService2 = useRef();
+
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Event: Form Submit');
     saveAppointment()
   };
 
-  const frmCompleteService2 = useRef();
-
   const handleSubmit2 = (e) => {
     e.preventDefault();
     
     const finalDate = appointment.appointmentDate || props.defaultDate
 
-    console.log("finalDate",finalDate)
+    //console.log("finalDate",finalDate)
 
     const dataToSend = {
         patient:props.patient?._id || props.patient,
@@ -450,6 +472,7 @@ const AppointmentsModal = props => {
                                 onChange={(event)=>{ handleChange(event , null)  }}    
                                 name="reasonForConsultation"  variant="outlined"
                                 value={  appointment.reasonForConsultation  }
+                                disabled={watch}
                                 multiline rows={3} />
                             </Grid>
 
@@ -468,6 +491,7 @@ const AppointmentsModal = props => {
                                 onChange={(event)=>{ handleChange(event , null)  }}    
                                 name="medicalReasonForConsultation"  variant="outlined"
                                 value={  appointment.medicalReasonForConsultation  }
+                                disabled={watch}
                                 multiline rows={3} />
                             </Grid>
                             
@@ -493,6 +517,7 @@ const AppointmentsModal = props => {
                                                 onChange={(event)=>{ handleChange(event , index)  }}
                                                 label="Principio activo a administrar" variant="outlined"
                                                 value={ medicines[index].product }
+                                                disabled={watch}
                                                 margin="dense"  />
                                             </Grid>
 
@@ -500,6 +525,7 @@ const AppointmentsModal = props => {
                                                 <TextField  style={{width:"99%"}} onChange={(event)=>{ handleChange(event , index)  }}
                                                 variant="outlined" name="presentation"  label="Presentación" select  
                                                 value={ medicines[index].presentation }
+                                                disabled={watch}
                                                 margin="dense" SelectProps={{ native: true }} >
                                                     <option className={classes.boldOption} >Selecciona</option>
                                                     {presentationTypes.map(option => (
@@ -516,16 +542,17 @@ const AppointmentsModal = props => {
                                             <Grid  item md={6} xs={12}>
                                                 <TextField style={{width:"99%"}} name="posology"  variant="outlined"
                                                 onChange={(event)=>{ handleChange(event , index)  }}
+                                                disabled={watch}
                                                 label="Posología"  margin="dense" value={ medicines[index].posology }  />
                                             </Grid>
 
                                             <Grid item md={6} xs={12}>
-                                                <TextField style={{width:"99%"}} fullWidth name="duration" label="Frecuencia o duración" variant="outlined" 
+                                                <TextField style={{width:"99%"}} fullWidth name="duration" label="Frecuencia o duración" variant="outlined" disabled={watch}
                                                 onChange={(event)=>{ handleChange(event , index)  }} margin="dense" value={ medicines[index].duration }  />
                                             </Grid> 
 
                                             <Grid item md={6} xs={12}>
-                                                <TextField  style={{width:"99%"}} name="administrationWay" label="Via" variant="outlined"
+                                                <TextField  style={{width:"99%"}} name="administrationWay" label="Via" variant="outlined" disabled={watch}
                                                 onChange={(event)=>{ handleChange(event , index)  }}  
                                                 value={ medicines[index].administrationWay }
                                                 margin="dense" select  SelectProps={{ native: true }} >
@@ -549,11 +576,13 @@ const AppointmentsModal = props => {
                                     
                                         <Divider></Divider>
                                         <Grid container direction="row" justify="center" alignItems="center">
+                                            { !watch &&
                                             <Button color="default" variant="contained" style={{marginTop:"10px",marginLeft:"5px"}} 
                                                 onClick={()=> addNewMedicament() }
                                             > 
                                                 Añadir otro medicamento
                                             </Button>
+                                            }
                                         </Grid>                                
 
                                     </Grid>
@@ -597,7 +626,8 @@ const AppointmentsModal = props => {
                                                 root: classes.floatingLabelFocusStyle,
                                                 focused: classes.floatingLabelFocusStyle,
                                             }                                    
-                                        }}                               
+                                        }}
+                                        disabled={watch}                               
                                         variant="outlined" />}                                
                             />
                         </Grid>
@@ -623,6 +653,7 @@ const AppointmentsModal = props => {
                                 }}
                                 name="resultsForConsultation"  variant="outlined"
                                 value={  appointment.resultsForConsultation  }
+                                disabled={watch}
                                 multiline rows={3} />          
                         </Grid>
 
@@ -632,7 +663,7 @@ const AppointmentsModal = props => {
                                     <Grid component="label" container alignItems="center" spacing={1}>
                                         <Grid style={{color:"white"}} item>¿ Desea agendar un examen para esta cita ? No</Grid>
                                         <Grid item>
-                                            <AntSwitch  onChange={(e)=>{
+                                            <AntSwitch  disabled={watch} onChange={(e)=>{
                                                 setAppointment({
                                                     ...appointment,
                                                     haveMedicalTest:e.target.checked
@@ -662,23 +693,27 @@ const AppointmentsModal = props => {
                                     <Grid  container>
 
                                     <Grid item md={12} xs={12}>
-                                        <TextField style={{width:"99%"}} name="testName"  variant="outlined"
+                                        <TextField style={{width:"99%"}} name="testName"  variant="outlined" disabled={watch}
+                                            value={  appointment.testName  }
                                             required={appointment.haveMedicalTest} onChange={(event)=>{ handleChange(event , null)  }}
                                             label="Nombre del examen"  margin="dense"  />
                                     </Grid>
 
                                     <Grid item md={6} xs={6}>
-                                        <TextField style={{width:"99%"}} name="laboratory"  variant="outlined"
-                                                required={appointment.haveMedicalTest} 
-                                                onChange={(event)=>{ handleChange(event , null)  }}
-                                                label="Laboratorio"  margin="dense"  />
+                                        <TextField style={{width:"99%"}} name="laboratory"  variant="outlined" disabled={watch}
+                                            value={  appointment.laboratory  }
+                                            required={appointment.haveMedicalTest} 
+                                            onChange={(event)=>{ handleChange(event , null)  }}
+                                            label="Laboratorio"  margin="dense"  />
                                     </Grid>
 
                                     <Grid item md={6} xs={6}>
-                                        <TextField style={{width:"99%"}} name="laboratoryAddress"  variant="outlined"
-                                                required={appointment.haveMedicalTest} 
-                                                onChange={(event)=>{ handleChange(event , null)  }}
-                                                label="Dirección"  margin="dense"  />
+                                        <TextField style={{width:"99%"}} name="laboratoryAddress" disabled={watch}
+                                            value={  appointment.laboratoryAddress  }
+                                            variant="outlined"
+                                            required={appointment.haveMedicalTest} 
+                                            onChange={(event)=>{ handleChange(event , null)  }}
+                                            label="Dirección"  margin="dense"  />
                                     </Grid>
                                     
                                                                    
@@ -691,11 +726,12 @@ const AppointmentsModal = props => {
 
                         
 
+                        { !watch &&
                         <Grid  container direction="row" justify="center" alignItems="center">        
                             <Button color="primary" type="submit"  variant="contained" style={{marginTop:"10px"}} >
                                 Guardar detalles cita
                             </Button>
-                        </Grid>
+                        </Grid>}
                         
                     </Grid>
                     

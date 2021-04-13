@@ -201,13 +201,13 @@ const SignIn = props => {
             Ingresar
           </Button>
 
-          <Button
+          {/*<Button
             fullWidth
             variant="contained"
             color="primary"          
           >
             Face Login
-          </Button>
+          </Button>*/}
 
           <Grid container>
             <Grid item xs>

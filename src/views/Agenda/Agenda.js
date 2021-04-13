@@ -7,16 +7,7 @@ import { getAgendaAnnotations, saveAgendaAnnotation } from 'actions/agendaAnnota
 import { getAppointments, saveAppointment, getAppointmentsByPatientAndDate  } from 'actions/appointments'
 import { getPatients } from 'actions/patients'
 import { saveMedicine, getMedicinesByAppointment } from 'actions/medicines'
-import { Dialog,
-  DialogTitle,
-  DialogContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Grid,
-  Button,
+import { Dialog,  DialogTitle,  DialogContent,  Table,  TableBody,  TableCell,  TableHead,  TableRow,  Grid,  Button,
 TextField } from '@material-ui/core'
 
 import PerfectScrollbar from 'react-perfect-scrollbar';

@@ -4,21 +4,9 @@ import PropTypes from 'prop-types';
 import moment from 'moment';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { makeStyles } from '@material-ui/styles';
-import {
-  Card,
-  CardActions,
-  CardContent,
-  Avatar,
+import { Card, CardActions,  CardContent, Avatar,
   //Checkbox,
-  Radio,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableRow,
-  Typography,
-  TablePagination
-} from '@material-ui/core';
+  Radio,  Table,  TableBody,  TableCell,  TableHead,  TableRow,  Typography,  TablePagination } from '@material-ui/core';
 
 import { getInitials } from 'helpers';
 
