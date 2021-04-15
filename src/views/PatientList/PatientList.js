@@ -119,7 +119,7 @@ class PatientList extends Component{
     this.props.setCurrentPatient(this.state.selectedPatient._id)
     
     this.props.history.push({
-      pathname: '/medicalRecords',
+      pathname: '/medicalRecords/'+ this.state.selectedPatient._id ,
       state: { id: this.state.selectedPatient._id }
     })   
 

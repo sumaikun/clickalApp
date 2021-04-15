@@ -103,7 +103,7 @@ const Routes = () => {
         exact
         layout={MainLayout}
         authenticated={true}
-        path="/medicalRecords"
+        path="/medicalRecords/:id"
       />      
       <RouteWithLayout
         component={TypographyView}

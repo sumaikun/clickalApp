@@ -29,21 +29,19 @@ const useStyles = makeStyles(theme => ({
 const MedicalRecords = props => {
 
   
-  //console.log("history id",props.history.location.state.id)
+  //console.log("history id",props)
 
-  try{
-    setCurrentPatient(props.history.location.state.id)
+  /*try{
+    setCurrentPatientId(props.history.location.state.id)
   }catch(e){
     console.error(e)
-  }
+  }*/
 
   
   
   const classes = useStyles();
 
-  const [currentPatientId] = useState(props.appState.currentPatient) 
-
-  const [patientFiles, setPatientFiles] = useState([])
+  const [currentPatientId ] = useState( props.match?.params?.id ) 
 
   const [ idPRToSave, setIdPRToSave ] = useState(null)
 
@@ -56,6 +54,8 @@ const MedicalRecords = props => {
   const [ appointmenWatch, setAppointmenWatch ] = useState(false)
 
   const [ watchValues, setWatchValues ] = useState()
+
+  const [ patient, setPatient ] = useState()
 
   useEffect(() => {
 
@@ -70,13 +70,21 @@ const MedicalRecords = props => {
 
       props.getAppointmentsByPatient(currentPatientId)
 
-      //props.getPatientFilesByPatient(currentPatientId)
+      props.getPatientFilesByPatient(currentPatientId)
 
       mounted = false
     } 
 
 
   },[]);  
+
+  useEffect(() =>{
+
+    const patient = props.patients.filter(  patient => patient._id == props.match?.params?.id  )[0]
+
+    setPatient(patient)
+
+  },[props.patients])
 
  
   const saveOrUpdatePatientReview = (values) =>{
@@ -156,11 +164,17 @@ const MedicalRecords = props => {
     
   }
 
-  const saveOrUpdatePatientFile = (values,cb) =>{ 
-    
-    console.log("patientFile to save",values)
+  const saveOrUpdatePatientFile = (values,cb) =>{    
 
     values.patient = currentPatientId
+
+    console.log("props.auth?.userType",props.auth)
+
+    if(props.auth?.userType === 2){
+      values.doctor = props.auth?.user._id
+    }
+
+    console.log("patientFile to save",values)
     
     if(idPFToSave)
     {
@@ -185,10 +199,9 @@ const MedicalRecords = props => {
           
             if(success)
             {
-                if(success.length > 0)
-                {                
-                  setPatientFiles(success)  
-                }    
+
+                props.getPatientFilesByPatient(currentPatientId)
+                
             }
 
         })  
@@ -210,7 +223,7 @@ const MedicalRecords = props => {
   return (
     <>
     <div className={classes.root} style={{marginTop:"25px"}}>
-        <Typography variant={"h3"} style={{textAlign:"center"}}>Historial Medico { " "+currentPatientId }</Typography>
+        <Typography variant={"h3"} style={{textAlign:"center"}}>Historial Medico { ` ${patient?.name} ${patient?.lastName}` }</Typography>
        
       <div className={classes.root}>
         
@@ -286,7 +299,7 @@ const MedicalRecords = props => {
             <Typography className={classes.heading}>Archivos</Typography>
             </ExpansionPanelSummary>
             <ExpansionPanelDetails>
-              <PatientFiles patientFiles={patientFiles}
+              <PatientFiles patientFiles={props.patientFiles}
                 saveOrUpdatePatientFile={saveOrUpdatePatientFile} />
             </ExpansionPanelDetails>
             
@@ -297,7 +310,7 @@ const MedicalRecords = props => {
 
     <AppointmentsModal 
           open={ open }
-          auth={ props.authState }
+          auth={ props.auth }
           doctors={ [] }
           handleClose={ ()=>setOpen(false) }
           saveAppointment={ props.saveAppointment }
@@ -307,6 +320,9 @@ const MedicalRecords = props => {
           patient = { props.patient }
           watch = { appointmenWatch }
           watchValues = { watchValues }
+          saveCb={()=>{
+            props.getAppointmentsByPatient(currentPatientId)
+          }}
     />  
     </>
   );
@@ -315,9 +331,11 @@ const MedicalRecords = props => {
 
 const mapStateToProps = state => {
   
-  console.log("state mr",state)
+  //console.log("state mr",state)
 
-  const patient = state.patients.patients.filter(  patient => patient._id == state.app.currentPatient  )[0]
+  //const patient = state.patients.patients.filter(  patient => patient._id == state.app.currentPatient  )[0]
+
+  const { patients } = state.patients
 
   //console.log("selectedPatient",patient)
 
@@ -327,17 +345,20 @@ const mapStateToProps = state => {
 
   const { appointments } = state.appointments
 
+  const { patientFiles } = state.patientFiles
+
   //console.log("selectedPatientReview",selectedPatientReview)
 
   return {
     //petsState: state.pets,
-    patient,
+    patients,
     appState: state.app, 
     selectedPatientReview,
     physiologicalConstants,
     selectedPhysiologicalConstant,
     appointments,
-    authState: state.auth
+    auth: state.auth,
+    patientFiles
   };
 }
 

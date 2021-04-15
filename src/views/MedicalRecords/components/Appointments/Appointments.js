@@ -48,7 +48,8 @@ const Appointments = props => {
             <div className={classes.inner}>
                 <Table fullWidth>
                 <TableHead>
-                    <TableRow>                  
+                    <TableRow>     
+                      <TableCell>Doctor/a</TableCell>            
                       <TableCell>Anotación</TableCell>
                       <TableCell>Estado</TableCell>
                       <TableCell>Motivo de la consulta</TableCell>
@@ -61,6 +62,7 @@ const Appointments = props => {
                 {
                     props.appointments.slice(0).reverse().map( appointment => ( 
                     <TableRow>
+                        <TableCell>{  appointment?.doctorDetails && `${appointment?.doctorDetails[0].name} ${appointment?.doctorDetails[0].lastName}` }</TableCell>  
                         <TableCell>{ appointment?.agendaAnnotation || "sin anotación de agenda" }</TableCell>
                         <TableCell>{ appointment?.state }</TableCell>
                         <TableCell>{ appointment?.reasonForConsultation }</TableCell>

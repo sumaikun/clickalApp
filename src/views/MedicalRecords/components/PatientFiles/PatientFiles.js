@@ -249,7 +249,7 @@ const PatientFiles = props => {
                 <Table>
                 <TableHead>
                     <TableRow>                  
-                        <TableCell>Veterinario/a</TableCell>
+                        <TableCell>Doctor/a</TableCell>
                         <TableCell>Nombre</TableCell>
                         <TableCell>Descargar</TableCell>
                         <TableCell>Descripción</TableCell>
@@ -261,7 +261,7 @@ const PatientFiles = props => {
                 {
                     props.patientFiles.slice(0).reverse().map( file => ( 
                     <TableRow>
-                        <TableCell>{ file.userDetails[0].name }</TableCell>
+                        <TableCell>{  file?.doctorDetails && `${file?.doctorDetails[0].name} ${file?.doctorDetails[0].lastName}` }</TableCell>
                         <TableCell>{ file.name }</TableCell>
                         <TableCell>{ generateFileIcon(file.filePath) }</TableCell>
                         <TableCell>{ file.description }</TableCell>
@@ -345,7 +345,7 @@ const PatientFiles = props => {
                         <Button color="primary" variant="contained" style={{marginTop:"10px"}}
                           onClick={()=>{
 
-                            console.log("values",values)
+                            //console.log("values",values)
 
                             let errorValidation = false
 
@@ -407,7 +407,7 @@ const PatientFiles = props => {
                                 }
                                 else{
                             
-                                  console.log("contact to save",values);
+                                  //console.log("contact to save",values);
                             
                                   props.saveOrUpdatePatientFile(values,()=>{
                                     setOpen(true)

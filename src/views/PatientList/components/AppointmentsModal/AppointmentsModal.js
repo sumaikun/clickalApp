@@ -68,7 +68,7 @@ const useStyles = makeStyles(theme => ({
 
 const AppointmentsModal = props => {
 
-    //console.log("props",props)
+    //console.log("props",props)      
 
     //console.log("default date", props.defaultDate , moment().toISOString())
 
@@ -314,11 +314,9 @@ const AppointmentsModal = props => {
             copyArray.push("debes poner un doctor para asociar la cita")
         }
       }
-      else{
-          if(props.auth?.user.specialistType)
-          {
-            appointment.doctor = props.auth?.user.id
-          }
+
+      if(props.auth?.userType === 2){
+        appointment.doctor = props.auth?.user._id
       }
       
 
@@ -355,6 +353,8 @@ const AppointmentsModal = props => {
                 })
             })
             //alert("cita guardada")
+
+            props.saveCb && props.saveCb()
 
             handleDialogOpen2(true)
           }

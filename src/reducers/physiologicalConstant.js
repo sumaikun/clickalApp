@@ -22,7 +22,7 @@ import {
           physiologicalConstants:action.physiologicalConstants,         
         });*/
 
-        console.log("all pyshio constants", action)
+        //console.log("all pyshio constants", action)
 
         const { physiologicalConstants } = action
 
